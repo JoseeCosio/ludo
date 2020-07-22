@@ -51,7 +51,8 @@ public class BackToBase {
 		}
 		if (victimas == 1) {
 			gameState.setRedPlayer(player);
-			System.out.println("Lastima de vuelta a casa!");
+			gameState.setExtraTurn(true);
+			System.out.println("Lastima de vuelta a casa! Obtienes otra tirada!");
 		}
 		return gameState;
 	}
@@ -77,7 +78,8 @@ public class BackToBase {
 		}
 		if (victimas == 1) {
 			gameState.setBluePlayer(player);
-			System.out.println("Lastima de vuelta a casa!");
+			gameState.setExtraTurn(true);
+			System.out.println("Lastima de vuelta a casa! Obtienes otra tirada!");
 		}
 		return gameState;
 	}
@@ -103,7 +105,8 @@ public class BackToBase {
 		}
 		if (victimas == 1) {
 			gameState.setGreenPlayer(player);
-			System.out.println("Lastima de vuelta a casa!");
+			gameState.setExtraTurn(true);
+			System.out.println("Lastima de vuelta a casa! Obtienes otra tirada!");
 		}
 		return gameState;
 	}
@@ -129,17 +132,18 @@ public class BackToBase {
 		}
 		if (victimas == 1) {
 			gameState.setYellowPlayer(player);
-			System.out.println("Lastima de vuelta a casa!");
+			gameState.setExtraTurn(true);
+			System.out.println("Lastima de vuelta a casa! Obtienes otra tirada!");
 		}
 		return gameState;
 	}
-	
+
 	public boolean isCellProtected(int cell) {
-		if(cell==1 || cell==9 || cell==14 || cell==22 || cell==27 || cell==35 || cell==40 || cell==48) {
+		if (cell == 1 || cell == 9 || cell == 14 || cell == 22 || cell == 27 || cell == 35 || cell == 40
+				|| cell == 48) {
 			System.out.println("Salvado por la campana!");
 			return true;
-		}
-		else {
+		} else {
 			return false;
 		}
 	}

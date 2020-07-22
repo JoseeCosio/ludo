@@ -1,6 +1,5 @@
 package dev.kodice.games.ludo;
 
-
 import lombok.Data;
 
 @Data
@@ -10,6 +9,7 @@ public class GameState {
 	private Player bluePlayer;
 	private Player greenPlayer;
 	private Player yellowPlayer;
+	private boolean extraTurn;
 
 	public GameState() {
 		Player player = new Player();
@@ -18,7 +18,7 @@ public class GameState {
 		this.bluePlayer = new Player();
 		this.greenPlayer = new Player();
 		this.yellowPlayer = new Player();
+		this.extraTurn = false;
 	}
-	
 
 }

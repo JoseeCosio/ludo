@@ -13,6 +13,7 @@ public class App {
 		int dice;
 		Game game = new Game();
 		System.out.println(game);
+		GameState gameState = new GameState();
 		Player player;
 		MovingMeeples movingMeeples;
 		int turno = 0;
@@ -23,7 +24,13 @@ public class App {
 			player = turn.getPlayerInTurn(game.getGameState());
 			dice = turn.rollDice();
 			System.out.println("El dado rueda en un " + dice);
-			movingMeeples = turn.canMeeplesMove(player, dice);
+			if(dice==6) {
+				gameState = game.getGameState();
+				gameState.setExtraTurn(true);
+				game.setGameState(gameState);
+				System.out.println("Obtienes otra tirada!");
+			}
+			movingMeeples = turn.getLegalMoves(player, dice);
 			System.out.println("El jugador tiene " + movingMeeples + " movimientos posibles!");
 			int meepleToMove;
 			if (movingMeeples.getMoving() > 0) {
@@ -31,7 +38,9 @@ public class App {
 				System.out.println("El jugador elige la opcion numero " + meepleToMove);
 				game.setGameState(turn.moveMeeple(game.getGameState(), dice, meepleToMove));
 				System.out.println(game);
-				game.setGameState(turn.passTurn(game.getGameState()));
+				if (!game.getGameState().isExtraTurn()) {
+					game.setGameState(turn.passTurn(game.getGameState()));
+				}
 			} else {
 				game.setGameState(turn.passTurn(game.getGameState()));
 			}
@@ -42,6 +51,9 @@ public class App {
 				victoria = 1;
 				System.out.println("El jugador ha llevado todas sus fichas a la meta!");
 			}
+			gameState = game.getGameState();
+			gameState.setExtraTurn(false);
+			game.setGameState(gameState);
 		}
 
 	}
