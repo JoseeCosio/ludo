@@ -97,12 +97,4 @@ public class GameServiceImpl implements GameService {
 		return null;
 	}
 
-	@Override
-	public boolean isKeyFromPlayer(Player player, String key) {
-		if (player.getKey().equals(key))
-			return true;
-		else
-			return false;
-	}
-
 }

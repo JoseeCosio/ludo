@@ -6,7 +6,9 @@ import java.util.Random;
 
 import org.springframework.stereotype.Service;
 
+import dev.kodice.games.ludo.domain.dto.GameStateDto;
 import dev.kodice.games.ludo.domain.dto.MovedMeeples;
+import dev.kodice.games.ludo.domain.dto.PlayerDto;
 import dev.kodice.games.ludo.domain.model.GameState;
 import dev.kodice.games.ludo.domain.model.Meeple;
 import dev.kodice.games.ludo.domain.model.Player;
@@ -350,6 +352,25 @@ public class TurnExecutor {
 			return gameState;
 		}
 		return gameState;
+	}
+
+	public GameStateDto gameStateToGameStateDto(GameState gameState) {
+		GameStateDto gameDto = new GameStateDto();
+		gameDto.setId(gameState.getId());
+		gameDto.setRedPlayer(this.playerToPlayerDto(gameState.getRedPlayer()));
+		gameDto.setBluePlayer(this.playerToPlayerDto(gameState.getBluePlayer()));
+		gameDto.setGreenPlayer(this.playerToPlayerDto(gameState.getGreenPlayer()));
+		gameDto.setYellowPlayer(this.playerToPlayerDto(gameState.getYellowPlayer()));
+		return gameDto;
+	}
+	
+	public PlayerDto playerToPlayerDto(Player player) {
+		PlayerDto playerDto = new PlayerDto();
+		playerDto.setMeeple1(player.getMeeple1().getPosition());
+		playerDto.setMeeple2(player.getMeeple2().getPosition());
+		playerDto.setMeeple3(player.getMeeple3().getPosition());
+		playerDto.setMeeple4(player.getMeeple4().getPosition());
+		return playerDto;
 	}
 
 }

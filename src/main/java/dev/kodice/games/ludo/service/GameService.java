@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import dev.kodice.games.ludo.domain.model.Game;
 import dev.kodice.games.ludo.domain.model.GameState;
-import dev.kodice.games.ludo.domain.model.Player;
 
 public interface GameService {
 
@@ -19,8 +18,6 @@ public interface GameService {
 	GameState reset(GameState gameState);
 
 	boolean isKeyFromGame(GameState gameState, String key);
-
-	boolean isKeyFromPlayer(Player player, String key);
 
 	String getPlayerToRoll(GameState gameState);
 }

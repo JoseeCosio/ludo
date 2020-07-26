@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import dev.kodice.games.ludo.PlayerAndLand;
 import dev.kodice.games.ludo.TurnExecutor;
+import dev.kodice.games.ludo.domain.dto.GameStateDto;
 import dev.kodice.games.ludo.domain.dto.PlayerActionDto;
 import dev.kodice.games.ludo.domain.dto.RegisterDto;
 import dev.kodice.games.ludo.domain.dto.TurnDto;
@@ -59,6 +60,16 @@ public class GameController {
 		return sessionService.createSession(registerDto);
 	}
 
+	@GetMapping("/reconnect/{id}")
+	public GameStateDto reconnect(@PathVariable Long id, @RequestHeader String key) {
+		Game game = gameService.getGameById(id).get();
+		if (gameService.isKeyFromGame(game.getGameState(), key)) {
+			GameStateDto gameStateDto = turnExecutor.gameStateToGameStateDto(game.getGameState());
+			return gameStateDto;
+		}
+		return null;
+	}
+
 	@GetMapping("/{gameId}/getTurn")
 	public TurnDto getTurn(@PathVariable Long gameId, @RequestBody PlayerActionDto action, @RequestHeader String key) {
 		Game game = gameService.getGameById(gameId).get();
@@ -84,16 +95,13 @@ public class GameController {
 			}
 		}
 		if (action.isRoll()) {
-			if (gameService.isKeyFromPlayer(playerInTurn, key)) {
-				if (game.getGameState().isRoll()) {
-					int dice;
-					dice = turnExecutor.rollDice();
+			if (playerInTurn.getKey().equals(key)) {
+				if (gameState.isRoll()) {
+					int dice = turnExecutor.rollDice();
 					System.out.println(gameService.getPlayerToRoll(gameState) + " player rolled a " + dice);
 					if (dice == 6) {
 						gameState.setExtraTurn(true);
 					}
-					gameState.setRolled(dice);
-					turn.setRolled(dice);
 					turn.setMoves(turnExecutor.getLegalMoves(playerInTurn, dice));
 					if (turn.getMoves().getMoving() == 0) {
 						System.out.println("No tienes movimientos posibles!");
@@ -118,6 +126,8 @@ public class GameController {
 						gameService.save(game);
 						return turn;
 					}
+					gameState.setRolled(dice);
+					turn.setRolled(dice);
 					if (turn.getMoves().getMoving() > 1) {
 						System.out.println("Más de 1 movimiento posible, enviar decisión!");
 						gameState.setRoll(false);
@@ -141,11 +151,12 @@ public class GameController {
 
 		}
 		if (action.getMove() > 0) {
-			if (gameService.isKeyFromPlayer(playerInTurn, key)) {
+			if (playerInTurn.getKey().equals(key)) {
 				if (game.getGameState().isMoving()) {
 					System.out.println(
 							gameService.getPlayerToRoll(gameState) + " choose option number " + action.getMove() + ".");
-					PlayerAndLand playLand = turnExecutor.moveMeeple(gameState, gameState.getRolled(), action.getMove());
+					PlayerAndLand playLand = turnExecutor.moveMeeple(gameState, gameState.getRolled(),
+							action.getMove());
 					gameState = playLand.getGameState();
 					turn.setMovedMeeples(playLand.getMovedMeeples());
 					gameState.setMoving(false);
