@@ -8,3 +8,4 @@
 .factoryPath
 .externalToolBuilders/
 .sts4-cache/
+.env

@@ -1,0 +1,25 @@
+version: '3.0'
+services:
+  database:
+    image: microsoft/mssql-server-linux:latest
+    ports:
+      - 1433:1433
+    environment:
+      - SA_PASSWORD=${DATABASE_PASSWORD}
+      - MSSQL_PID=Express
+      - ACCEPT_EULA=Y
+
+  backend:
+    build:
+      context: .
+      args:
+        - jarfile=${JAR_FILE}
+    image: kodice/ludo-api:latest
+    environment:
+        - connectionString=jdbc:sqlserver://database:1433;DatabaseName=Ludo
+        - databaseUser=${DATABASE_USE}
+        - databasePassword=${DATABASE_PASSWORD}
+    ports:
+      - 8080:8080
+    depends_on:
+      - database
