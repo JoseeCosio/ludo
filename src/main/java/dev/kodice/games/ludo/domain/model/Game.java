@@ -29,7 +29,11 @@ public class Game {
 	private GameState gameState;
 
 	public Game() {
-		this.gameState = new GameState();
+		this.gameState = new GameState(4);
+	}
+	
+	public Game(int playerNumber) {
+		this.gameState = new GameState(playerNumber);
 	}
 
 }

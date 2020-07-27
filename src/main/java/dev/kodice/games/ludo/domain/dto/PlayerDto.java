@@ -1,15 +1,12 @@
 package dev.kodice.games.ludo.domain.dto;
 
+import java.util.List;
+
 import lombok.Data;
 
 @Data
 public class PlayerDto {
 
-	private int meeple1;
-
-	private int meeple2;
-
-	private int meeple3;
-
-	private int meeple4;
+	private List<Long> meeples;
+	
 }

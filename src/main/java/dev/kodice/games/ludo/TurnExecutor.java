@@ -7,7 +7,7 @@ import java.util.Random;
 import org.springframework.stereotype.Service;
 
 import dev.kodice.games.ludo.domain.dto.GameStateDto;
-import dev.kodice.games.ludo.domain.dto.MovedMeeples;
+import dev.kodice.games.ludo.domain.dto.Landing;
 import dev.kodice.games.ludo.domain.dto.PlayerDto;
 import dev.kodice.games.ludo.domain.model.GameState;
 import dev.kodice.games.ludo.domain.model.Meeple;
@@ -19,11 +19,6 @@ public class TurnExecutor {
 	public int rollDice() {
 		Random rand = new Random();
 		return rand.nextInt(6) + 1;
-	}
-
-	public int getMeepleToMove(int options) {
-		Random rand = new Random();
-		return rand.nextInt(options) + 1;
 	}
 
 	public boolean canMeepleMove(Meeple meeple, int dice) {
@@ -40,111 +35,119 @@ public class TurnExecutor {
 		}
 	}
 
-	public MovingMeeples getLegalMoves(Player player, int dice) {
-		MovingMeeples meeples = new MovingMeeples();
-		boolean moving[] = new boolean[4];
-		moving[0] = this.canMeepleMove(player.getMeeple1(), dice);
-		moving[1] = this.canMeepleMove(player.getMeeple2(), dice);
-		moving[2] = this.canMeepleMove(player.getMeeple3(), dice);
-		moving[3] = this.canMeepleMove(player.getMeeple4(), dice);
-		meeples.setMeeples(moving);
-		int quantity = 0;
-		for (int i = 0; i <= 3; i++) {
-			if (moving[i])
-				quantity++;
+	public List<Boolean> getLegalMoves(Player player, int dice) {
+		List<Boolean> moving = new ArrayList<Boolean>();
+		for (Meeple m : player.getMeeples()) {
+			if (this.canMeepleMove(m, dice)) {
+				moving.add(true);
+			} else {
+				moving.add(false);
+			}
 		}
-		meeples.setMoving(quantity);
-		return meeples;
+		return moving;
 	}
 
-	public Player getPlayerInTurn(GameState gameState) {
-		if (gameState.getRedPlayer().getTurn()) {
-			System.out.println("Juega el rojo!");
-			return gameState.getRedPlayer();
+	public boolean isCellProtected(int cell) {
+		if (cell == 1 || cell == 9 || cell == 14 || cell == 22 || cell == 27 || cell == 35 || cell == 40
+				|| cell == 48) {
+			return true;
+		} else {
+			return false;
 		}
-		if (gameState.getBluePlayer().getTurn()) {
-			System.out.println("Juega el azul!");
-			return gameState.getBluePlayer();
+	}
+
+	public int getNumberOfLegalMoves(List<Boolean> legalMoves) {
+		int num = 0;
+		for (Boolean b : legalMoves) {
+			if (b) {
+				num++;
+			}
 		}
-		if (gameState.getGreenPlayer().getTurn()) {
-			System.out.println("Juega el verde!");
-			return gameState.getGreenPlayer();
+		return num;
+	}
+
+	public int getLegalMove(List<Boolean> legalMoves) {
+		int num = 1;
+		for (Boolean b : legalMoves) {
+			if (b) {
+				return num;
+			}
+			num++;
 		}
-		if (gameState.getYellowPlayer().getTurn()) {
-			System.out.println("Juega el amarillo!");
-			return gameState.getYellowPlayer();
+		return num;
+	}
+
+	public Player getPlayerInTurn(List<Player> players) {
+		for (Player p : players) {
+			if (p.getTurn()) {
+				return p;
+			}
 		}
 		return null;
 	}
 
-	public boolean isPlayerInTurn(Player player) {
-		return player.getTurn();
-	}
-
-	public Meeple getLandingCell(Meeple meeple, int dice, String turn) {
+	public Landing getLandingCell(Meeple meeple, int dice, int turn) {
+		Landing landing = new Landing();
 		switch (turn) {
-		case ("red"):
+		case (1):
 			if (meeple.getPosition() == 0) {
 				meeple.setPosition(1);
 				meeple.setRelativePosition(1);
 			} else {
-				meeple.setRelativePosition(meeple.getRelativePosition() + dice);
+				landing.setRelativePosition(meeple.getRelativePosition() + dice);
 				if (meeple.getRelativePosition() > 51) {
-					meeple.setPosition(meeple.getRelativePosition() + 1);
+					landing.setPosition(meeple.getRelativePosition() + 1);
 				} else
-					meeple.setPosition(meeple.getPosition() + dice);
+					landing.setPosition(meeple.getPosition() + dice);
 			}
 			break;
-		case ("blue"):
+		case (2):
 			if (meeple.getPosition() == 0) {
-				meeple.setPosition(14);
-				meeple.setRelativePosition(1);
+				landing.setPosition(14);
+				landing.setRelativePosition(1);
 			} else {
-				meeple.setRelativePosition(meeple.getRelativePosition() + dice);
+				landing.setRelativePosition(meeple.getRelativePosition() + dice);
 				if (meeple.getRelativePosition() > 51) {
-					meeple.setPosition(meeple.getRelativePosition() + 7);
+					landing.setPosition(meeple.getRelativePosition() + 7);
 				} else {
 					if (meeple.getPosition() == 52) {
-						meeple.setPosition(52);
-						System.out.println("Aquí no te salvas!");
+						landing.setPosition(52);
 					} else {
-						meeple.setPosition((meeple.getPosition() + dice) % 52);
+						landing.setPosition((meeple.getPosition() + dice) % 52);
 					}
 				}
 			}
 			break;
-		case ("green"):
+		case (3):
 			if (meeple.getPosition() == 0) {
-				meeple.setPosition(27);
-				meeple.setRelativePosition(1);
+				landing.setPosition(27);
+				landing.setRelativePosition(1);
 			} else {
-				meeple.setRelativePosition(meeple.getRelativePosition() + dice);
+				landing.setRelativePosition(meeple.getRelativePosition() + dice);
 				if (meeple.getRelativePosition() > 51) {
-					meeple.setPosition(meeple.getRelativePosition() + 13);
+					landing.setPosition(meeple.getRelativePosition() + 13);
 				} else {
 					if (meeple.getPosition() == 52) {
-						meeple.setPosition(52);
-						System.out.println("Aquí no te salvas!");
+						landing.setPosition(52);
 					} else {
-						meeple.setPosition((meeple.getPosition() + dice) % 52);
+						landing.setPosition((meeple.getPosition() + dice) % 52);
 					}
 				}
 			}
 			break;
-		case ("yellow"):
+		case (4):
 			if (meeple.getPosition() == 0) {
-				meeple.setPosition(40);
-				meeple.setRelativePosition(1);
+				landing.setPosition(40);
+				landing.setRelativePosition(1);
 			} else {
-				meeple.setRelativePosition(meeple.getRelativePosition() + dice);
+				landing.setRelativePosition(meeple.getRelativePosition() + dice);
 				if (meeple.getRelativePosition() > 51) {
-					meeple.setPosition(meeple.getRelativePosition() + 19);
+					landing.setPosition(meeple.getRelativePosition() + 19);
 				} else {
-					if (meeple.getPosition() == 52) {
-						meeple.setPosition(52);
-						System.out.println("Aquí no te salvas!");
+					if (meeple.getPosition() + dice == 52) {
+						landing.setPosition(52);
 					} else {
-						meeple.setPosition((meeple.getPosition() + dice) % 52);
+						landing.setPosition((meeple.getPosition() + dice) % 52);
 					}
 				}
 			}
@@ -153,224 +156,54 @@ public class TurnExecutor {
 			break;
 		}
 
-		return meeple;
+		return landing;
 	}
 
-	public PlayerAndLand moveMeepleInPlayer(Player player, int dice, int moving, String turn) {
-		int check = 0;
-		int meepleNumber = 1;
-		Meeple meeple;
-		Meeple land = new Meeple();
-		PlayerAndLand playerAndLand = new PlayerAndLand();
-		MovedMeeples move = new MovedMeeples();
-		List<MovedMeeples> moved = new ArrayList<MovedMeeples>();
-		if (this.canMeepleMove(player.getMeeple1(), dice)) {
-			check++;
-			if (check == moving) {
-				meeple = player.getMeeple1();
-				move.setInitialPosition(meeple.getPosition());
-				playerAndLand.setInitialMeeple(meeple);
-				land = this.getLandingCell(meeple, dice, turn);
-				player.setMeeple1(land);
-				move.setPlayerId(player.getId());
-				move.setMeeple(meepleNumber);
-				move.setFinalPosition(land.getPosition());
-				moved.add(move);
-				playerAndLand.setMovedMeeples(moved);
-				playerAndLand.setMoved(true);
-				check = 5;
+	public List<Player> passTurn(List<Player> players) {
+		int num = players.size();
+		int which = 0;
+		for (Player p : players) {
+			if (p.getTurn()) {
+				p.setTurn(false);
+				which = num;
 			}
+			num++;
 		}
-		meepleNumber = 2;
-		if (this.canMeepleMove(player.getMeeple2(), dice)) {
-			check++;
-			if (check == moving) {
-				meeple = player.getMeeple2();
-				move.setInitialPosition(meeple.getPosition());
-				playerAndLand.setInitialMeeple(meeple);
-				land = this.getLandingCell(meeple, dice, turn);
-				player.setMeeple2(land);
-				move.setPlayerId(player.getId());
-				move.setMeeple(meepleNumber);
-				move.setFinalPosition(land.getPosition());
-				moved.add(move);
-				playerAndLand.setMovedMeeples(moved);
-				playerAndLand.setMoved(true);
-				check = 5;
+		num = 0;
+		which = (which + 1) % 4;
+		for (Player p : players) {
+			if (which == num) {
+				p.setTurn(true);
+				which = num;
 			}
+			num++;
 		}
-		meepleNumber = 3;
-		if (this.canMeepleMove(player.getMeeple3(), dice)) {
-			check++;
-			if (check == moving) {
-				meeple = player.getMeeple3();
-				move.setInitialPosition(meeple.getPosition());
-				playerAndLand.setInitialMeeple(meeple);
-				land = this.getLandingCell(meeple, dice, turn);
-				player.setMeeple3(land);
-				move.setPlayerId(player.getId());
-				move.setMeeple(meepleNumber);
-				move.setFinalPosition(land.getPosition());
-				moved.add(move);
-				playerAndLand.setMovedMeeples(moved);
-				playerAndLand.setMoved(true);
-				check = 5;
-			}
-		}
-		meepleNumber = 4;
-		if (this.canMeepleMove(player.getMeeple4(), dice)) {
-			check++;
-			if (check == moving) {
-				meeple = player.getMeeple4();
-				move.setInitialPosition(meeple.getPosition());
-				playerAndLand.setInitialMeeple(meeple);
-				land = this.getLandingCell(meeple, dice, turn);
-				player.setMeeple4(land);
-				move.setPlayerId(player.getId());
-				move.setMeeple(meepleNumber);
-				move.setFinalPosition(land.getPosition());
-				moved.add(move);
-				playerAndLand.setMovedMeeples(moved);
-				playerAndLand.setMoved(true);
-				check = 5;
-			}
-		}
-		playerAndLand.setPlayer(player);
-		playerAndLand.setFinalMeeple(land);
-		return playerAndLand;
-	}
-
-	public PlayerAndLand moveMeeple(GameState gameState, int dice, int moving) {
-		PlayerAndLand playLand = new PlayerAndLand();
-		PlayerAndLand kickLand = new PlayerAndLand();
-		BackToBase kick = new BackToBase();
-		List<MovedMeeples> moved = new ArrayList<MovedMeeples>();
-		if (gameState.getRedPlayer().getTurn()) {
-			playLand = this.moveMeepleInPlayer(gameState.getRedPlayer(), dice, moving, "red");
-			moved.addAll(playLand.getMovedMeeples());
-			gameState.setRedPlayer(playLand.getPlayer());
-			if (!kick.isCellProtected(playLand.getFinalMeeple().getPosition())) {
-				kickLand = kick.kickEnemies(gameState, playLand.getFinalMeeple(), "red");
-				if (kickLand.isMoved()) {
-					moved.addAll(kickLand.getMovedMeeples());
-					gameState = kickLand.getGameState();
-				}
-			}
-			if (playLand.getFinalMeeple().getRelativePosition() == 57) {
-				gameState.setExtraTurn(true);
-				System.out.println("Meeple llegó a la meta. Obtienes una tirada extra!");
-			}
-		}
-		if (gameState.getBluePlayer().getTurn()) {
-			playLand = this.moveMeepleInPlayer(gameState.getBluePlayer(), dice, moving, "blue");
-			moved.addAll(playLand.getMovedMeeples());
-			gameState.setBluePlayer(playLand.getPlayer());
-			System.out.println(gameState);
-			if (!kick.isCellProtected(playLand.getFinalMeeple().getPosition()))
-				kickLand = kick.kickEnemies(gameState, playLand.getFinalMeeple(), "blue");
-			if (kickLand.isMoved()) {
-				moved.addAll(kickLand.getMovedMeeples());
-				gameState = kickLand.getGameState();
-			}
-			if (playLand.getFinalMeeple().getRelativePosition() == 57) {
-				gameState.setExtraTurn(true);
-				System.out.println("Meeple llegó a la meta. Obtienes una tirada extra!");
-			}
-		}
-		System.out.println(gameState);
-		if (gameState.getGreenPlayer().getTurn()) {
-			playLand = this.moveMeepleInPlayer(gameState.getGreenPlayer(), dice, moving, "green");
-			moved.addAll(playLand.getMovedMeeples());
-			gameState.setGreenPlayer(playLand.getPlayer());
-			if (!kick.isCellProtected(playLand.getFinalMeeple().getPosition()))
-				kickLand = kick.kickEnemies(gameState, playLand.getFinalMeeple(), "green");
-			if (kickLand.isMoved()) {
-				moved.addAll(kickLand.getMovedMeeples());
-				gameState = kickLand.getGameState();
-			}
-			if (playLand.getFinalMeeple().getRelativePosition() == 57) {
-				gameState.setExtraTurn(true);
-				System.out.println("Meeple llegó a la meta. Obtienes una tirada extra!");
-			}
-		}
-		if (gameState.getYellowPlayer().getTurn()) {
-			playLand = this.moveMeepleInPlayer(gameState.getYellowPlayer(), dice, moving, "yellow");
-			moved.addAll(playLand.getMovedMeeples());
-			gameState.setYellowPlayer(playLand.getPlayer());
-			if (!kick.isCellProtected(playLand.getFinalMeeple().getPosition()))
-				kickLand = kick.kickEnemies(gameState, playLand.getFinalMeeple(), "yellow");
-			if (kickLand.isMoved()) {
-				moved.addAll(kickLand.getMovedMeeples());
-				gameState = kickLand.getGameState();
-			}
-			if (playLand.getFinalMeeple().getRelativePosition() == 57) {
-				gameState.setExtraTurn(true);
-				System.out.println("Meeple llegó a la meta. Obtienes una tirada extra!");
-			}
-		}
-		playLand.setMovedMeeples(moved);
-		playLand.setGameState(gameState);
-		return playLand;
-	}
-
-	public GameState passTurn(GameState gameState) {
-		Player player;
-		if (gameState.getRedPlayer().getTurn()) {
-			player = gameState.getRedPlayer();
-			player.setTurn(false);
-			gameState.setRedPlayer(player);
-			player = gameState.getBluePlayer();
-			player.setTurn(true);
-			gameState.setBluePlayer(player);
-			return gameState;
-		}
-		if (gameState.getBluePlayer().getTurn()) {
-			player = gameState.getBluePlayer();
-			player.setTurn(false);
-			gameState.setBluePlayer(player);
-			player = gameState.getGreenPlayer();
-			player.setTurn(true);
-			gameState.setGreenPlayer(player);
-			return gameState;
-		}
-		if (gameState.getGreenPlayer().getTurn()) {
-			player = gameState.getGreenPlayer();
-			player.setTurn(false);
-			gameState.setGreenPlayer(player);
-			player = gameState.getYellowPlayer();
-			player.setTurn(true);
-			gameState.setYellowPlayer(player);
-			return gameState;
-		}
-		if (gameState.getYellowPlayer().getTurn()) {
-			player = gameState.getYellowPlayer();
-			player.setTurn(false);
-			gameState.setYellowPlayer(player);
-			player = gameState.getRedPlayer();
-			player.setTurn(true);
-			gameState.setRedPlayer(player);
-			return gameState;
-		}
-		return gameState;
+		return players;
 	}
 
 	public GameStateDto gameStateToGameStateDto(GameState gameState) {
 		GameStateDto gameDto = new GameStateDto();
 		gameDto.setId(gameState.getId());
-		gameDto.setRedPlayer(this.playerToPlayerDto(gameState.getRedPlayer()));
-		gameDto.setBluePlayer(this.playerToPlayerDto(gameState.getBluePlayer()));
-		gameDto.setGreenPlayer(this.playerToPlayerDto(gameState.getGreenPlayer()));
-		gameDto.setYellowPlayer(this.playerToPlayerDto(gameState.getYellowPlayer()));
+		gameDto.setPlayers(this.playerToPlayerDto(gameState.getPlayers()));
 		return gameDto;
 	}
-	
-	public PlayerDto playerToPlayerDto(Player player) {
-		PlayerDto playerDto = new PlayerDto();
-		playerDto.setMeeple1(player.getMeeple1().getPosition());
-		playerDto.setMeeple2(player.getMeeple2().getPosition());
-		playerDto.setMeeple3(player.getMeeple3().getPosition());
-		playerDto.setMeeple4(player.getMeeple4().getPosition());
-		return playerDto;
+
+	public List<PlayerDto> playerToPlayerDto(List<Player> players) {
+		List<PlayerDto> playerDtos = new ArrayList<PlayerDto>();
+		for (Player p : players) {
+			PlayerDto playerDto = new PlayerDto();
+			playerDto.setMeeples(this.meepleToLong(p.getMeeples()));
+			playerDtos.add(playerDto);
+		}
+		return playerDtos;
+	}
+
+	private List<Long> meepleToLong(List<Meeple> meeples) {
+		List<Long> position = new ArrayList<Long>();
+		for (Meeple m : meeples) {
+			position.add((long) m.getPosition());
+		}
+		return position;
 	}
 
 }

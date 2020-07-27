@@ -1,5 +1,6 @@
 package dev.kodice.games.ludo.service.impl;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -40,29 +41,40 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public GameState reset(GameState gameState) {
-		Player[] players = new Player[] { gameState.getRedPlayer(), gameState.getBluePlayer(),
-				gameState.getGreenPlayer(), gameState.getYellowPlayer() };
-		Random rand = new Random();
-		int turn = rand.nextInt(4) + 1;
-		int meeple = 1;
-		for (Player p : players) {
-			p.setMeeple1(this.resetMeeple(p.getMeeple1()));
-			p.setMeeple2(this.resetMeeple(p.getMeeple2()));
-			p.setMeeple3(this.resetMeeple(p.getMeeple3()));
-			p.setMeeple4(this.resetMeeple(p.getMeeple4()));
-			p.setTurn(false);
-			if (turn == meeple)
-				p.setTurn(true);
-			players[meeple - 1] = p;
-			meeple++;
-		}
-		gameState.setRedPlayer(players[0]);
-		gameState.setBluePlayer(players[1]);
-		gameState.setGreenPlayer(players[2]);
-		gameState.setYellowPlayer(players[3]);
+	public Game reset(Game game) {
+		game.setGameState(this.resetGameState(game.getGameState()));
+		return game;
+	}
+
+	private GameState resetGameState(GameState gameState) {
 		gameState.setExtraTurn(false);
+		gameState.setRoll(true);
+		gameState.setRolled(0);
+		gameState.setMoving(false);
+		gameState.setPlayers(this.resetPlayers(gameState.getPlayers()));
 		return gameState;
+	}
+
+	private List<Player> resetPlayers(List<Player> players) {
+		Random ran = new Random();
+		int turn = ran.nextInt(players.size()) + 1;
+		int num = 1;
+		for (Player p : players) {
+			p.setTurn(false);
+			if (turn == num) {
+				p.setTurn(true);
+			}
+			p.setMeeples(this.resetMeeples(p.getMeeples()));
+			num++;
+		}
+		return players;
+	}
+
+	private List<Meeple> resetMeeples(List<Meeple> meeples) {
+		for (Meeple m : meeples) {
+			m = this.resetMeeple(m);
+		}
+		return meeples;
 	}
 
 	private Meeple resetMeeple(Meeple meeple) {
@@ -72,29 +84,25 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public boolean isKeyFromGame(GameState gameState, String key) {
-		if (gameState.getRedPlayer().getKey().equals(key))
-			return true;
-		if (gameState.getBluePlayer().getKey().equals(key))
-			return true;
-		if (gameState.getGreenPlayer().getKey().equals(key))
-			return true;
-		if (gameState.getYellowPlayer().getKey().equals(key))
-			return true;
+	public boolean isKeyFromGame(List<Player> players, String key) {
+		for (Player p : players) {
+			if (p.getKey().equals(key)) {
+				return true;
+			}
+		}
 		return false;
 	}
 
 	@Override
-	public String getPlayerToRoll(GameState gameState) {
-		if (gameState.getRedPlayer().getTurn())
-			return "red";
-		if (gameState.getBluePlayer().getTurn())
-			return "blue";
-		if (gameState.getGreenPlayer().getTurn())
-			return "green";
-		if (gameState.getYellowPlayer().getTurn())
-			return "yellow";
-		return null;
+	public int getPlayerToRoll(List<Player> players) {
+		int num = 1;
+		for (Player p : players) {
+			if (p.getTurn()) {
+				return num;
+			}
+			num++;
+		}
+		return num;
 	}
 
 }
