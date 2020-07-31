@@ -190,6 +190,7 @@ public class TurnExecutor {
 
 	public List<PlayerDto> playerToPlayerDto(List<Player> players) {
 		List<PlayerDto> playerDtos = new ArrayList<PlayerDto>();
+		System.out.println(players.size());
 		for (Player p : players) {
 			PlayerDto playerDto = new PlayerDto();
 			playerDto.setMeeples(this.meepleToLong(p.getMeeples()));

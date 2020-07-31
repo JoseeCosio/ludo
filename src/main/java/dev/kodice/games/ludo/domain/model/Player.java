@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,10 +14,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 
+import org.hibernate.annotations.Proxy;
+
 import lombok.Data;
 
 @Data
 @Entity
+@Proxy(lazy=false)
 public class Player {
 
 	@Id
@@ -28,7 +32,7 @@ public class Player {
 	@Column(name = "[key]")
 	private String key;
 
-	@OneToMany(cascade = CascadeType.ALL)
+	@OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
 	@JoinTable(name = "PLAYER_MEEPLE", joinColumns = {
 			@JoinColumn(name = "player_id", referencedColumnName = "id") }, inverseJoinColumns = {
 					@JoinColumn(name = "meeple_id", referencedColumnName = "id") })

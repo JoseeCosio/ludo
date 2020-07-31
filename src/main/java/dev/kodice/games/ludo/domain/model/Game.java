@@ -9,6 +9,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToOne;
 
+import org.hibernate.annotations.Proxy;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Data;
@@ -16,6 +18,7 @@ import lombok.Data;
 @Data
 @Entity
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+@Proxy(lazy=false)
 public class Game {
 
 	@Id

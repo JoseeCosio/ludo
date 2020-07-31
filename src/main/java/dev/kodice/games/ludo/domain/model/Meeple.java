@@ -5,10 +5,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import org.hibernate.annotations.Proxy;
+
 import lombok.Data;
 
 @Data
 @Entity
+@Proxy(lazy=false)
 public class Meeple {
 
 	@Id
