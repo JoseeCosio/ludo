@@ -8,10 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import dev.kodice.games.ludo.domain.model.Game;
+import dev.kodice.games.ludo.domain.model.GameSnapshot;
 import dev.kodice.games.ludo.domain.model.GameState;
 import dev.kodice.games.ludo.domain.model.Meeple;
 import dev.kodice.games.ludo.domain.model.Player;
 import dev.kodice.games.ludo.repository.GameRepository;
+import dev.kodice.games.ludo.repository.GameSnapshotRepository;
 import dev.kodice.games.ludo.service.GameService;
 
 @Service
@@ -19,6 +21,9 @@ public class GameServiceImpl implements GameService {
 
 	@Autowired
 	GameRepository gameRepository;
+	
+	@Autowired
+	GameSnapshotRepository gameSnapshotRepository;
 
 	@Override
 	public Game newGame(Game game) {
@@ -103,6 +108,21 @@ public class GameServiceImpl implements GameService {
 			num++;
 		}
 		return num;
+	}
+
+	@Override
+	public List<GameSnapshot> getSnapshot(Long gameId) {
+		return gameSnapshotRepository.findAllBygId(gameId);
+	}
+
+	@Override
+	public void setExtraTurn(Long gameId) {
+		gameRepository.setExtraTurn(gameId);
+	}
+
+	@Override
+	public void removeExtraTurn(Long gameId) {
+		gameRepository.removeExtraTurn(gameId);
 	}
 
 }

@@ -3,6 +3,8 @@ package dev.kodice.games.ludo.web;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import dev.kodice.games.ludo.SnapExecutor;
 import dev.kodice.games.ludo.TurnExecutor;
 import dev.kodice.games.ludo.domain.dto.GameStateDto;
 import dev.kodice.games.ludo.domain.dto.MovedMeeple;
@@ -23,6 +26,7 @@ import dev.kodice.games.ludo.domain.dto.PlayerActionDto;
 import dev.kodice.games.ludo.domain.dto.RegisterDto;
 import dev.kodice.games.ludo.domain.dto.TurnDto;
 import dev.kodice.games.ludo.domain.model.Game;
+import dev.kodice.games.ludo.domain.model.GameSnapshot;
 import dev.kodice.games.ludo.domain.model.GameState;
 import dev.kodice.games.ludo.domain.model.Player;
 import dev.kodice.games.ludo.domain.model.Session;
@@ -42,6 +46,9 @@ public class GameController {
 
 	@Autowired
 	TurnExecutor turnExecutor;
+
+	@Autowired
+	SnapExecutor snapExecutor;
 
 	@GetMapping("/newGame")
 	@ResponseStatus(code = HttpStatus.CREATED)
@@ -73,22 +80,28 @@ public class GameController {
 		return null;
 	}
 
-	@GetMapping("/{gameId}/getTurn")
-	public TurnDto getTurn(@PathVariable Long gameId, @RequestBody PlayerActionDto action, @RequestHeader String key) {
-		Game game = gameService.getGameById(gameId).get();
-		GameState gameState = game.getGameState();
+	@Transactional
+	@GetMapping("/{id}/getTurn")
+	public TurnDto getTurn(@PathVariable Long id, @RequestBody PlayerActionDto action, @RequestHeader String key) {
+		List<GameSnapshot> snapshotGame = gameService.getSnapshot(id);
+		System.out.println(snapshotGame);
+		Player playerInTurn = snapExecutor.getPlayerInTurn(snapshotGame);
+
+//		Game game = gameService.getGameById(id).get();
+//		GameState gameState = game.getGameState();
+//		System.out.println(gameState);
 		TurnDto turn = new TurnDto();
-		Player playerInTurn = turnExecutor.getPlayerInTurn(gameState.getPlayers());
+
 		if (action.isSincronize()) {
-			if (gameService.isKeyFromGame(gameState.getPlayers(), key)) {
-				turn.setPlayerInTurn(gameService.getPlayerToRoll(gameState.getPlayers()));
-				if (game.getGameState().isRoll()) {
+			if (snapExecutor.isKeyFromGame(key, snapshotGame)) {
+				turn.setPlayerInTurn(snapExecutor.getPlayerToRoll(snapshotGame));
+				if (snapshotGame.get(0).isSRoll()) {
 					turn.setMessage("Waiting " + turn.getPlayerInTurn() + " player to roll!");
 					return turn;
 				}
-				if (game.getGameState().isMoving()) {
-					turn.setRolled(gameState.getRolled());
-					turn.setMoves(turnExecutor.getLegalMoves(playerInTurn, game.getGameState().getRolled()));
+				if (snapshotGame.get(0).isSMove()) {
+					turn.setRolled(snapshotGame.get(0).getSRolled());
+					turn.setMoves(turnExecutor.getLegalMoves(playerInTurn, snapshotGame.get(0).getSRolled()));
 					turn.setMessage("Waiting " + turn.getPlayerInTurn() + " player to choose a move!");
 					return turn;
 				}
@@ -99,10 +112,10 @@ public class GameController {
 		}
 		if (action.isRoll()) {
 			if (playerInTurn.getKey().equals(key)) {
-				if (gameState.isRoll()) {
+				if (snapshotGame.get(0).isSRoll()) {
 					int dice = turnExecutor.rollDice();
 					if (dice == 6) {
-						gameState.setExtraTurn(true);
+						gameService.setExtraTurn(id);
 					}
 					List<Boolean> legalMoves = new ArrayList<Boolean>();
 					legalMoves = turnExecutor.getLegalMoves(playerInTurn, dice);
@@ -110,10 +123,8 @@ public class GameController {
 					int moves = turnExecutor.getNumberOfLegalMoves(legalMoves);
 					turn.setRolled(dice);
 					if (moves == 0) {
-						gameState.setExtraTurn(false);
-						gameState.setPlayers(turnExecutor.passTurn(gameState.getPlayers()));
-						game.setGameState(gameState);
-						gameService.save(game);
+						gameService.removeExtraTurn(id);
+						snapExecutor.passTurn(snapshotGame);
 						return turn;
 					}
 					if (moves == 1) {
