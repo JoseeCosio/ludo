@@ -7,11 +7,13 @@ import javax.persistence.Id;
 
 import org.hibernate.annotations.Proxy;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @Entity
 @Proxy(lazy=false)
+@AllArgsConstructor
 public class Meeple {
 
 	@Id

@@ -56,4 +56,10 @@ public class Player {
 		this.meeples.set(meeple-1, m);
 	}
 
+	public Player(Long id, String key, Boolean turn) {
+		this.id = id;
+		this.key = key;
+		this.turn = turn;
+	}
+
 }

@@ -89,6 +89,7 @@ public class SnapExecutor {
 
 	public List<MovedMeeple> moveMeeple(List<GameSnapshot> snapshot, int moving) {
 		GameState game = this.snapshotToGameState(snapshot);
+		System.out.println(game);
 		List<MovedMeeple> moved = new ArrayList<MovedMeeple>();
 		int turn = 1;
 		TurnExecutor turnExe = new TurnExecutor();
@@ -99,6 +100,7 @@ public class SnapExecutor {
 				if (turnExe.canMeepleMove(m, game.getRolled())) {
 					game.updateMeeple(turn, moving, landing);
 					Meeple m2save = game.getMeeple(turn, moving);
+					System.out.println(m2save);
 					gameService.updateMeeple(m2save);
 					MovedMeeple movedMeeple = new MovedMeeple(game.getPlayers().get(turn - 1).getId(), moving,
 							m.getPosition() - game.getRolled(), m.getPosition());
@@ -122,29 +124,21 @@ public class SnapExecutor {
 		return moved;
 	}
 
-	private GameState snapshotToGameState(List<GameSnapshot> snapshot) {
+	public GameState snapshotToGameState(List<GameSnapshot> snapshot) {
 		List<Player> players = new ArrayList<Player>();
-		Long pId = 0L;
-		Meeple meeple = new Meeple();
-		Player player = new Player();
 		List<Meeple> meeples = new ArrayList<Meeple>();
-		for (GameSnapshot g : snapshot) {
-			if (!pId.equals(g.getPId()) && !pId.equals(0L)) {
-				player.setMeeples(meeples);
-				players.add(player);
-				player = new Player();
-				pId = g.getPId();
+		int index=0;
+		for(GameSnapshot g:snapshot) {
+			if(index%4==0) {
+				players.add(new Player(g.getPId(),g.getPKey(),g.isPTurn()));
 			}
-			player.setId(g.getPId());
-			player.setKey(g.getPKey());
-			player.setTurn(g.isPTurn());
-			meeple = new Meeple();
-			meeple.setId(g.getMId());
-			meeple.setPosition(g.getMPos());
-			meeple.setRelativePosition(g.getMRel());
-			meeples.add(meeple);
+			meeples.add(new Meeple(g.getMId(),g.getMPos(),g.getMRel()));
+			if(index%4==3) {
+				players.get(index/4).setMeeples(meeples);
+				meeples = new ArrayList<Meeple>();
+			}
+			index++;
 		}
-		players.add(player);
 		GameState game = new GameState();
 		game.setId(snapshot.get(0).getGId());
 		game.setPlayers(players);

@@ -6,10 +6,7 @@ import java.util.Random;
 
 import org.springframework.stereotype.Service;
 
-import dev.kodice.games.ludo.domain.dto.GameStateDto;
 import dev.kodice.games.ludo.domain.dto.Landing;
-import dev.kodice.games.ludo.domain.dto.PlayerDto;
-import dev.kodice.games.ludo.domain.model.GameState;
 import dev.kodice.games.ludo.domain.model.Meeple;
 import dev.kodice.games.ludo.domain.model.Player;
 
@@ -179,32 +176,6 @@ public class TurnExecutor {
 			num++;
 		}
 		return players;
-	}
-
-	public GameStateDto gameStateToGameStateDto(GameState gameState) {
-		GameStateDto gameDto = new GameStateDto();
-		gameDto.setId(gameState.getId());
-		gameDto.setPlayers(this.playerToPlayerDto(gameState.getPlayers()));
-		return gameDto;
-	}
-
-	public List<PlayerDto> playerToPlayerDto(List<Player> players) {
-		List<PlayerDto> playerDtos = new ArrayList<PlayerDto>();
-		System.out.println(players.size());
-		for (Player p : players) {
-			PlayerDto playerDto = new PlayerDto();
-			playerDto.setMeeples(this.meepleToLong(p.getMeeples()));
-			playerDtos.add(playerDto);
-		}
-		return playerDtos;
-	}
-
-	private List<Long> meepleToLong(List<Meeple> meeples) {
-		List<Long> position = new ArrayList<Long>();
-		for (Meeple m : meeples) {
-			position.add((long) m.getPosition());
-		}
-		return position;
 	}
 
 }

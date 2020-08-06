@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import dev.kodice.games.ludo.SnapExecutor;
 import dev.kodice.games.ludo.TurnExecutor;
-import dev.kodice.games.ludo.domain.dto.GameStateDto;
 import dev.kodice.games.ludo.domain.dto.MovedMeeple;
 import dev.kodice.games.ludo.domain.dto.PlayerActionDto;
 import dev.kodice.games.ludo.domain.dto.RegisterDto;
@@ -70,11 +69,10 @@ public class GameController {
 	}
 
 	@GetMapping("/reconnect/{id}")
-	public GameStateDto reconnect(@PathVariable Long id, @RequestHeader String key) {
-		Game game = gameService.getGameById(id).get();
-		if (gameService.isKeyFromGame(game.getGameState().getPlayers(), key)) {
-			GameStateDto gameStateDto = turnExecutor.gameStateToGameStateDto(game.getGameState());
-			return gameStateDto;
+	public List<GameSnapshot> reconnect(@PathVariable Long id, @RequestHeader String key) {
+		List<GameSnapshot> snapshot = gameService.getSnapshot(id);
+		if (snapExecutor.isKeyFromGame(key, snapshot)) {
+			return snapshot;
 		}
 		return null;
 	}
@@ -83,7 +81,6 @@ public class GameController {
 	@GetMapping("/{id}/getTurn")
 	public TurnDto getTurn(@PathVariable Long id, @RequestBody PlayerActionDto action, @RequestHeader String key) {
 		List<GameSnapshot> snapshot = gameService.getSnapshot(id);
-		System.out.println(snapshot);
 		Player playerInTurn = snapExecutor.getPlayerInTurn(snapshot);
 		TurnDto turn = new TurnDto();
 		if (action.isSincronize()) {
@@ -149,7 +146,7 @@ public class GameController {
 		}
 		if (action.getMove() > 0) {
 			if (playerInTurn.getKey().equals(key)) {
-				if (!gameService.getGameById(id).get().getGameState().isMoving()) {
+				if (snapshot.get(0).isSMove()) {
 					List<MovedMeeple> movedMeeples = snapExecutor.moveMeeple(snapshot, action.getMove());
 					turn.setMovedMeeples(movedMeeples);
 					gameService.setRoll(id);
