@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import dev.kodice.games.ludo.domain.model.Game;
 import dev.kodice.games.ludo.domain.model.GameSnapshot;
+import dev.kodice.games.ludo.domain.model.Meeple;
 import dev.kodice.games.ludo.domain.model.Player;
 
 public interface GameService {
@@ -28,5 +29,12 @@ public interface GameService {
 	void setExtraTurn(Long gameId);
 	
 	void removeExtraTurn(Long gameId);
+
+	void setRolled(int dice, Long id);
+
+	void setRoll(Long id);
+
+	void setMove(Long id);
 	
+	void updateMeeple(Meeple meeple);
 }

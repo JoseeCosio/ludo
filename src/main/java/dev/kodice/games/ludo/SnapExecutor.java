@@ -9,15 +9,20 @@ import org.springframework.stereotype.Service;
 import dev.kodice.games.ludo.domain.dto.Landing;
 import dev.kodice.games.ludo.domain.dto.MovedMeeple;
 import dev.kodice.games.ludo.domain.model.GameSnapshot;
+import dev.kodice.games.ludo.domain.model.GameState;
 import dev.kodice.games.ludo.domain.model.Meeple;
 import dev.kodice.games.ludo.domain.model.Player;
 import dev.kodice.games.ludo.repository.PlayerRepository;
+import dev.kodice.games.ludo.service.GameService;
 
 @Service
 public class SnapExecutor {
 
 	@Autowired
 	PlayerRepository playerRepository;
+
+	@Autowired
+	GameService gameService;
 
 	public Player getPlayerInTurn(List<GameSnapshot> snapshotGame) {
 		Player player = new Player();
@@ -79,35 +84,71 @@ public class SnapExecutor {
 			}
 		}
 		playerRepository.removeTurn(index.get(turn));
-		playerRepository.setTurn(index.get((turn+1)%4));
+		playerRepository.setTurn(index.get((turn + 1) % 4));
 	}
 
-	public List<MovedMeeple> moveMeeple(int dice, int moving) {
+	public List<MovedMeeple> moveMeeple(List<GameSnapshot> snapshot, int moving) {
+		GameState game = this.snapshotToGameState(snapshot);
 		List<MovedMeeple> moved = new ArrayList<MovedMeeple>();
 		int turn = 1;
 		TurnExecutor turnExe = new TurnExecutor();
-		for (Player p : this.getPlayers()) {
+		for (Player p : game.getPlayers()) {
 			if (p.getTurn()) {
-				Meeple m = this.getMeeple(turn, moving);
-				Landing landing = turnExe.getLandingCell(m, dice, turn);
-				if (turnExe.canMeepleMove(m, dice)) {
-					this.updateMeeple(turn, moving, landing);
-					MovedMeeple movedMeeple = new MovedMeeple(this.getPlayers().get(turn - 1).getId(), moving,
-							m.getPosition() - dice, m.getPosition());
+				Meeple m = game.getMeeple(turn, moving);
+				Landing landing = turnExe.getLandingCell(m, game.getRolled(), turn);
+				if (turnExe.canMeepleMove(m, game.getRolled())) {
+					game.updateMeeple(turn, moving, landing);
+					Meeple m2save = game.getMeeple(turn, moving);
+					gameService.updateMeeple(m2save);
+					MovedMeeple movedMeeple = new MovedMeeple(game.getPlayers().get(turn - 1).getId(), moving,
+							m.getPosition() - game.getRolled(), m.getPosition());
 					moved.add(movedMeeple);
 				}
 				if (!turnExe.isCellProtected(landing.getPosition())) {
-					List<MovedMeeple> movedMeeples = this.kickMeeples(landing.getPosition(), turn);
+					List<MovedMeeple> movedMeeples = game.kickMeeples(landing.getPosition(), turn);
+					for (MovedMeeple up : movedMeeples) {
+						gameService.updateMeeple(game.getMeeple(up.getPlayerId().intValue(), up.getMeeple()));
+					}
 					if (movedMeeples.size() > 0) {
 						moved.addAll(movedMeeples);
 					}
 				}
 				if (landing.getPosition() == 57) {
-					this.setExtraTurn(true);
+					game.setExtraTurn(true);
 				}
 			}
 			turn++;
 		}
 		return moved;
+	}
+
+	private GameState snapshotToGameState(List<GameSnapshot> snapshot) {
+		List<Player> players = new ArrayList<Player>();
+		Long pId = 0L;
+		Meeple meeple = new Meeple();
+		Player player = new Player();
+		List<Meeple> meeples = new ArrayList<Meeple>();
+		for (GameSnapshot g : snapshot) {
+			if (!pId.equals(g.getPId()) && !pId.equals(0L)) {
+				player.setMeeples(meeples);
+				players.add(player);
+				player = new Player();
+				pId = g.getPId();
+			}
+			player.setId(g.getPId());
+			player.setKey(g.getPKey());
+			player.setTurn(g.isPTurn());
+			meeple = new Meeple();
+			meeple.setId(g.getMId());
+			meeple.setPosition(g.getMPos());
+			meeple.setRelativePosition(g.getMRel());
+			meeples.add(meeple);
+		}
+		players.add(player);
+		GameState game = new GameState();
+		game.setId(snapshot.get(0).getGId());
+		game.setPlayers(players);
+		game.setRolled(snapshot.get(0).getSRolled());
+		return game;
 	}
 }

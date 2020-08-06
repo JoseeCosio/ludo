@@ -30,7 +30,7 @@ public class GameState {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinTable(name = "GAME_STATE_PLAYER", joinColumns = {
 			@JoinColumn(name = "game_state_id", referencedColumnName = "id") }, inverseJoinColumns = {
 					@JoinColumn(name = "player_id", referencedColumnName = "id") })
