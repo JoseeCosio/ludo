@@ -6,8 +6,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import dev.kodice.games.ludo.domain.dto.GameStateDto;
 import dev.kodice.games.ludo.domain.dto.Landing;
 import dev.kodice.games.ludo.domain.dto.MovedMeeple;
+import dev.kodice.games.ludo.domain.dto.PlayerDto;
 import dev.kodice.games.ludo.domain.model.GameSnapshot;
 import dev.kodice.games.ludo.domain.model.GameState;
 import dev.kodice.games.ludo.domain.model.Meeple;
@@ -145,4 +147,26 @@ public class SnapExecutor {
 		game.setRolled(snapshot.get(0).getSRolled());
 		return game;
 	}
+
+	public GameStateDto snapshotToGameStateDto(List<GameSnapshot> snapshot) {
+		List<PlayerDto> players = new ArrayList<PlayerDto>();
+		List<Long> meeples = new ArrayList<Long>();
+		int index=0;
+		for(GameSnapshot g:snapshot) {
+			if(index%4==0) {
+				players.add(new PlayerDto(g.getPId()));
+			}
+			meeples.add((long) g.getMPos());
+			if(index%4==3) {
+				players.get(index/4).setMeeples(meeples);
+				meeples = new ArrayList<Long>();
+			}
+			index++;
+		}
+		GameStateDto game = new GameStateDto();
+		game.setId(snapshot.get(0).getGId());
+		game.setPlayers(players);
+		return game;
+	}
+
 }
