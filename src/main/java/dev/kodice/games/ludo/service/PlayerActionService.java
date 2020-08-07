@@ -146,7 +146,7 @@ public class PlayerActionService {
 		}
 	}
 
-	private TurnDto getActionRequiredNoKey(List<GameSnapshot> snapshot) {
+	public TurnDto getActionRequiredNoKey(List<GameSnapshot> snapshot) {
 		TurnDto turn = new TurnDto();
 		Player playerInTurn = snapExecutor.getPlayerInTurn(snapshot);
 		turn.setPlayerInTurn(snapExecutor.getPlayerToRoll(snapshot));
@@ -163,7 +163,7 @@ public class PlayerActionService {
 		return turn;
 	}
 
-	private TurnDto rollDiceNoKey(Long id, List<GameSnapshot> snapshot) {
+	public TurnDto rollDiceNoKey(Long id, List<GameSnapshot> snapshot) {
 		TurnDto turn = new TurnDto();
 		Player playerInTurn = snapExecutor.getPlayerInTurn(snapshot);
 		if (snapshot.get(0).isSRoll()) {
@@ -204,7 +204,7 @@ public class PlayerActionService {
 		return turn;
 	}
 
-	private TurnDto moveMeepleNoKey(Long id, List<GameSnapshot> snapshot, int moving) {
+	public TurnDto moveMeepleNoKey(Long id, List<GameSnapshot> snapshot, int moving) {
 		TurnDto turn = new TurnDto();
 			if (snapshot.get(0).isSMove()) {
 				List<MovedMeeple> movedMeeples = snapExecutor.moveMeeple(snapshot, moving);

@@ -8,10 +8,12 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
 import dev.kodice.games.ludo.SnapExecutor;
-import dev.kodice.games.ludo.domain.dto.GameStateDto;
+import dev.kodice.games.ludo.domain.dto.TurnDto;
 import dev.kodice.games.ludo.domain.model.GameSnapshot;
 import dev.kodice.games.ludo.domain.model.HelloMessage;
 import dev.kodice.games.ludo.service.GameService;
+import dev.kodice.games.ludo.service.MessageService;
+import dev.kodice.games.ludo.service.PlayerActionService;
 
 @Controller
 public class GreetingController {
@@ -22,13 +24,35 @@ public class GreetingController {
 	@Autowired
 	SnapExecutor snap;
 
+	@Autowired
+	PlayerActionService playerActionService;
+
+	@Autowired
+	MessageService messageService;
+
 	@MessageMapping("/hello")
 	@SendTo("/topic/greetings")
-	public GameStateDto greeting(HelloMessage message) throws Exception {
-		if (message.getName().equals("pasame el juego")) {
-			List<GameSnapshot> snapshot = gameService.getSnapshot(1L);
-			GameStateDto game = snap.snapshotToGameStateDto(snapshot);
-			return game;
+	public TurnDto greeting(HelloMessage message) throws Exception {
+		TurnDto turn = new TurnDto();
+		if (message.getName().startsWith("sync")) {
+			List<GameSnapshot> snapshot = gameService.getSnapshot(Long.parseLong(message.getName().substring(5)));
+			turn = playerActionService.getActionRequiredNoKey(snapshot);
+			turn.setGame(snapshot);
+			return turn;
+		}
+		if (message.getName().startsWith("roll")) {
+			Long id = Long.parseLong(message.getName().substring(5));
+			List<GameSnapshot> snapshot = gameService.getSnapshot(id);
+			turn = playerActionService.rollDiceNoKey(id, snapshot);
+			turn.setGame(snapshot);
+			return turn;
+		}
+		if (message.getName().startsWith("move")) {
+			Long id = Long.parseLong(message.getName().substring(7));
+			List<GameSnapshot> snapshot = gameService.getSnapshot(id);
+			turn = playerActionService.moveMeepleNoKey(id, snapshot, Integer.parseInt(message.getName().substring(5, 6)));
+			turn.setGame(snapshot);
+			return turn;
 		}
 		return null;
 	}
