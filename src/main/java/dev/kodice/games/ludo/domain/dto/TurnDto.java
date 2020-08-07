@@ -2,7 +2,7 @@ package dev.kodice.games.ludo.domain.dto;
 
 import java.util.List;
 
-import dev.kodice.games.ludo.domain.model.GameSnapshot;
+import dev.kodice.games.ludo.domain.model.FrontSnapshot;
 import lombok.Data;
 
 @Data
@@ -18,5 +18,5 @@ public class TurnDto {
 	
 	private String message;
 	
-	private List<GameSnapshot> game;
+	private List<FrontSnapshot> game;
 }

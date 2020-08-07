@@ -10,6 +10,7 @@ import dev.kodice.games.ludo.domain.dto.GameStateDto;
 import dev.kodice.games.ludo.domain.dto.Landing;
 import dev.kodice.games.ludo.domain.dto.MovedMeeple;
 import dev.kodice.games.ludo.domain.dto.PlayerDto;
+import dev.kodice.games.ludo.domain.model.FrontSnapshot;
 import dev.kodice.games.ludo.domain.model.GameSnapshot;
 import dev.kodice.games.ludo.domain.model.GameState;
 import dev.kodice.games.ludo.domain.model.Meeple;
@@ -186,6 +187,14 @@ public class SnapExecutor {
 		game.setId(snapshot.get(0).getGId());
 		game.setPlayers(players);
 		return game;
+	}
+	
+	public List<FrontSnapshot> mapToFrontSnapshot(List<GameSnapshot> snapshot){
+		List<FrontSnapshot> snap = new ArrayList<FrontSnapshot>();
+		for(GameSnapshot g:snapshot) {
+			snap.add(g.mapToFrontSnapshot());
+		}
+		return snap;
 	}
 
 }
