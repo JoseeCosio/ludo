@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import dev.kodice.games.ludo.SnapExecutor;
 import dev.kodice.games.ludo.TurnExecutor;
@@ -13,6 +14,7 @@ import dev.kodice.games.ludo.domain.dto.TurnDto;
 import dev.kodice.games.ludo.domain.model.GameSnapshot;
 import dev.kodice.games.ludo.domain.model.Player;
 
+@Service
 public class PlayerActionService {
 
 	@Autowired
@@ -90,6 +92,7 @@ public class PlayerActionService {
 				turn.setMoves(legalMoves);
 				int moves = turnExecutor.getNumberOfLegalMoves(legalMoves);
 				turn.setRolled(dice);
+				gameService.setRolled(dice, id);
 				if (moves == 0) {
 					gameService.removeExtraTurn(id);
 					snapExecutor.passTurn(snapshot);
@@ -103,7 +106,6 @@ public class PlayerActionService {
 					gameService.removeExtraTurn(id);
 					return turn;
 				}
-				gameService.setRolled(dice, id);
 				if (moves > 1) {
 					gameService.setMove(id);
 					return turn;
@@ -176,20 +178,20 @@ public class PlayerActionService {
 			turn.setMoves(legalMoves);
 			int moves = turnExecutor.getNumberOfLegalMoves(legalMoves);
 			turn.setRolled(dice);
+			gameService.setRolled(dice, id);
 			if (moves == 0) {
 				gameService.removeExtraTurn(id);
 				snapExecutor.passTurn(snapshot);
 				return turn;
 			}
 			if (moves == 1) {
-				turn.setMovedMeeples(snapExecutor.moveMeeple(snapshot, turnExecutor.getLegalMove(legalMoves)));
+				turn.setMovedMeeples(snapExecutor.moveMeeple(snapshot, turnExecutor.getLegalMove(legalMoves),dice));
 				if (!gameService.getGameById(id).get().getGameState().isExtraTurn()) {
 					snapExecutor.passTurn(snapshot);
 				}
 				gameService.removeExtraTurn(id);
 				return turn;
 			}
-			gameService.setRolled(dice, id);
 			if (moves > 1) {
 				gameService.setMove(id);
 				return turn;

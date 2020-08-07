@@ -2,6 +2,8 @@ package dev.kodice.games.ludo.web;
 
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -12,7 +14,6 @@ import dev.kodice.games.ludo.domain.dto.TurnDto;
 import dev.kodice.games.ludo.domain.model.GameSnapshot;
 import dev.kodice.games.ludo.domain.model.HelloMessage;
 import dev.kodice.games.ludo.service.GameService;
-import dev.kodice.games.ludo.service.MessageService;
 import dev.kodice.games.ludo.service.PlayerActionService;
 
 @Controller
@@ -27,9 +28,7 @@ public class GreetingController {
 	@Autowired
 	PlayerActionService playerActionService;
 
-	@Autowired
-	MessageService messageService;
-
+	@Transactional
 	@MessageMapping("/hello")
 	@SendTo("/topic/greetings")
 	public TurnDto greeting(HelloMessage message) throws Exception {
