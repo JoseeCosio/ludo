@@ -36,21 +36,21 @@ public class GreetingController {
 		if (message.getName().startsWith("sync")) {
 			List<GameSnapshot> snapshot = gameService.getSnapshot(Long.parseLong(message.getName().substring(5)));
 			turn = playerActionService.getActionRequiredNoKey(snapshot);
-			turn.setGame(snap.mapToFrontSnapshot(snapshot));
+			turn.setGame(snap.frontSnapToFrontPlayerDto(snapshot));
 			return turn;
 		}
 		if (message.getName().startsWith("roll")) {
 			Long id = Long.parseLong(message.getName().substring(5));
 			List<GameSnapshot> snapshot = gameService.getSnapshot(id);
 			turn = playerActionService.rollDiceNoKey(id, snapshot);
-			turn.setGame(snap.mapToFrontSnapshot(snapshot));
+			turn.setGame(snap.frontSnapToFrontPlayerDto(snapshot));
 			return turn;
 		}
 		if (message.getName().startsWith("move")) {
 			Long id = Long.parseLong(message.getName().substring(7));
 			List<GameSnapshot> snapshot = gameService.getSnapshot(id);
 			turn = playerActionService.moveMeepleNoKey(id, snapshot, Integer.parseInt(message.getName().substring(5, 6)));
-			turn.setGame(snap.mapToFrontSnapshot(snapshot));
+			turn.setGame(snap.frontSnapToFrontPlayerDto(snapshot));
 			return turn;
 		}
 		return null;

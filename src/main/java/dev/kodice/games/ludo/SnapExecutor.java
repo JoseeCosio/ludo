@@ -10,6 +10,8 @@ import dev.kodice.games.ludo.domain.dto.GameStateDto;
 import dev.kodice.games.ludo.domain.dto.Landing;
 import dev.kodice.games.ludo.domain.dto.MovedMeeple;
 import dev.kodice.games.ludo.domain.dto.PlayerDto;
+import dev.kodice.games.ludo.domain.dto.front.FrontPlayerDto;
+import dev.kodice.games.ludo.domain.dto.front.GameDto;
 import dev.kodice.games.ludo.domain.model.FrontSnapshot;
 import dev.kodice.games.ludo.domain.model.GameSnapshot;
 import dev.kodice.games.ludo.domain.model.GameState;
@@ -99,8 +101,8 @@ public class SnapExecutor {
 		GameState game = this.snapshotToGameState(snapshot, dice);
 		return this.move(game, moving);
 	}
-	
-	private List<MovedMeeple> move(GameState game,int moving) {
+
+	private List<MovedMeeple> move(GameState game, int moving) {
 		List<MovedMeeple> moved = new ArrayList<MovedMeeple>();
 		int turn = 1;
 		TurnExecutor turnExe = new TurnExecutor();
@@ -146,7 +148,7 @@ public class SnapExecutor {
 		game.setRolled(dice);
 		return game;
 	}
-	
+
 	private GameState snapToGame(List<GameSnapshot> snapshot) {
 		List<Player> players = new ArrayList<Player>();
 		List<Meeple> meeples = new ArrayList<Meeple>();
@@ -188,13 +190,42 @@ public class SnapExecutor {
 		game.setPlayers(players);
 		return game;
 	}
-	
-	public List<FrontSnapshot> mapToFrontSnapshot(List<GameSnapshot> snapshot){
+
+	public List<FrontSnapshot> mapToFrontSnapshot(List<GameSnapshot> snapshot) {
 		List<FrontSnapshot> snap = new ArrayList<FrontSnapshot>();
-		for(GameSnapshot g:snapshot) {
+		for (GameSnapshot g : snapshot) {
 			snap.add(g.mapToFrontSnapshot());
 		}
 		return snap;
+	}
+
+	public GameDto frontSnapToFrontPlayerDto(List<GameSnapshot> snapshot) {
+		List<FrontPlayerDto> players = new ArrayList<FrontPlayerDto>();
+		List<Long> meeples = new ArrayList<Long>();
+		GameDto gameDto = new GameDto();
+		int index = 0;
+		for (GameSnapshot g : snapshot) {
+			if (index % 4 == 0) {
+				players.add(new FrontPlayerDto());
+				if(g.isPTurn()) {
+					gameDto.setPlayerTurn(index/4+1);
+				}
+			}
+			meeples.add((long) g.getMPos());
+			if (index % 4 == 3) {
+				players.get(index / 4).setMeeples(meeples);
+				meeples = new ArrayList<Long>();
+			}
+			index++;
+		}
+		gameDto.setPlayers(players);
+		gameDto.setDice(snapshot.get(0).getSRolled());
+		if(snapshot.get(0).isSRoll()) {
+			gameDto.setRequiredAction("roll");
+		}else {
+			gameDto.setRequiredAction("move");
+		}
+		return gameDto;
 	}
 
 }

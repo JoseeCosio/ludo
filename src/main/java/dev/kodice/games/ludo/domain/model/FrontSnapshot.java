@@ -14,5 +14,5 @@ public class FrontSnapshot {
 	private boolean pTurn;
 
 	private int mPos;
-	
+
 }
