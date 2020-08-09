@@ -197,7 +197,7 @@ public class PlayerActionService {
 				return turn;
 			}
 		}
-		if (!gameService.getGameById(id).get().getGameState().isMoving()) {
+		if (gameService.getGameById(id).get().getGameState().isMoving()) {
 			turn.setMessage("Waitign for a move, not a roll!");
 			turn.setRolled(snapshot.get(0).getSRolled());
 			turn.setMoves(turnExecutor.getLegalMoves(playerInTurn, turn.getRolled()));
