@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import dev.kodice.games.ludo.domain.model.Game;
 import dev.kodice.games.ludo.domain.model.GameSnapshot;
-import dev.kodice.games.ludo.domain.model.GameState;
 import dev.kodice.games.ludo.domain.model.Meeple;
 import dev.kodice.games.ludo.domain.model.Player;
 import dev.kodice.games.ludo.repository.GameRepository;
@@ -51,17 +50,12 @@ public class GameServiceImpl implements GameService {
 
 	@Override
 	public Game reset(Game game) {
-		game.setGameState(this.resetGameState(game.getGameState()));
+		game.setExtraTurn(false);
+		game.setRoll(true);
+		game.setRolled(0);
+		game.setMoving(false);
+		game.setPlayers(this.resetPlayers(game.getPlayers()));
 		return game;
-	}
-
-	private GameState resetGameState(GameState gameState) {
-		gameState.setExtraTurn(false);
-		gameState.setRoll(true);
-		gameState.setRolled(0);
-		gameState.setMoving(false);
-		gameState.setPlayers(this.resetPlayers(gameState.getPlayers()));
-		return gameState;
 	}
 
 	private List<Player> resetPlayers(List<Player> players) {

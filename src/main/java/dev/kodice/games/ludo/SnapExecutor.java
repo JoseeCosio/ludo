@@ -14,7 +14,7 @@ import dev.kodice.games.ludo.domain.dto.front.FrontPlayerDto;
 import dev.kodice.games.ludo.domain.dto.front.GameDto;
 import dev.kodice.games.ludo.domain.model.FrontSnapshot;
 import dev.kodice.games.ludo.domain.model.GameSnapshot;
-import dev.kodice.games.ludo.domain.model.GameState;
+import dev.kodice.games.ludo.domain.model.Game;
 import dev.kodice.games.ludo.domain.model.Meeple;
 import dev.kodice.games.ludo.domain.model.Player;
 import dev.kodice.games.ludo.repository.PlayerRepository;
@@ -93,16 +93,16 @@ public class SnapExecutor {
 	}
 
 	public List<MovedMeeple> moveMeeple(List<GameSnapshot> snapshot, int moving) {
-		GameState game = this.snapshotToGameState(snapshot);
+		Game game = this.snapshotToGameState(snapshot);
 		return this.move(game, moving);
 	}
 
 	public List<MovedMeeple> moveMeeple(List<GameSnapshot> snapshot, int moving, int dice) {
-		GameState game = this.snapshotToGameState(snapshot, dice);
+		Game game = this.snapshotToGameState(snapshot, dice);
 		return this.move(game, moving);
 	}
 
-	private List<MovedMeeple> move(GameState game, int moving) {
+	private List<MovedMeeple> move(Game game, int moving) {
 		List<MovedMeeple> moved = new ArrayList<MovedMeeple>();
 		int turn = 1;
 		TurnExecutor turnExe = new TurnExecutor();
@@ -137,19 +137,19 @@ public class SnapExecutor {
 		return moved;
 	}
 
-	public GameState snapshotToGameState(List<GameSnapshot> snapshot) {
-		GameState game = this.snapToGame(snapshot);
+	public Game snapshotToGameState(List<GameSnapshot> snapshot) {
+		Game game = this.snapToGame(snapshot);
 		game.setRolled(snapshot.get(0).getSRolled());
 		return game;
 	}
 
-	public GameState snapshotToGameState(List<GameSnapshot> snapshot, int dice) {
-		GameState game = this.snapToGame(snapshot);
+	public Game snapshotToGameState(List<GameSnapshot> snapshot, int dice) {
+		Game game = this.snapToGame(snapshot);
 		game.setRolled(dice);
 		return game;
 	}
 
-	private GameState snapToGame(List<GameSnapshot> snapshot) {
+	private Game snapToGame(List<GameSnapshot> snapshot) {
 		List<Player> players = new ArrayList<Player>();
 		List<Meeple> meeples = new ArrayList<Meeple>();
 		int index = 0;
@@ -164,7 +164,7 @@ public class SnapExecutor {
 			}
 			index++;
 		}
-		GameState game = new GameState();
+		Game game = new Game();
 		game.setId(snapshot.get(0).getGId());
 		game.setPlayers(players);
 		return game;

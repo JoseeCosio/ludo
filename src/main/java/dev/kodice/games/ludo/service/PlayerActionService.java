@@ -100,7 +100,7 @@ public class PlayerActionService {
 				}
 				if (moves == 1) {
 					turn.setMovedMeeples(snapExecutor.moveMeeple(snapshot, turnExecutor.getLegalMove(legalMoves)));
-					if (!gameService.getGameById(id).get().getGameState().isExtraTurn()) {
+					if (!gameService.getGameById(id).get().isExtraTurn()) {
 						snapExecutor.passTurn(snapshot);
 					}
 					gameService.removeExtraTurn(id);
@@ -111,7 +111,7 @@ public class PlayerActionService {
 					return turn;
 				}
 			}
-			if (!gameService.getGameById(id).get().getGameState().isMoving()) {
+			if (!gameService.getGameById(id).get().isMoving()) {
 				turn.setMessage("Waitign for a move, not a roll!");
 				turn.setRolled(snapshot.get(0).getSRolled());
 				turn.setMoves(turnExecutor.getLegalMoves(playerInTurn, turn.getRolled()));
@@ -132,7 +132,7 @@ public class PlayerActionService {
 				List<MovedMeeple> movedMeeples = snapExecutor.moveMeeple(snapshot, moving);
 				turn.setMovedMeeples(movedMeeples);
 				gameService.setRoll(id);
-				if (!gameService.getGameById(id).get().getGameState().isExtraTurn()) {
+				if (!gameService.getGameById(id).get().isExtraTurn()) {
 					snapExecutor.passTurn(snapshot);
 				}
 				gameService.removeExtraTurn(id);
@@ -186,7 +186,7 @@ public class PlayerActionService {
 			}
 			if (moves == 1) {
 				turn.setMovedMeeples(snapExecutor.moveMeeple(snapshot, turnExecutor.getLegalMove(legalMoves),dice));
-				if (!gameService.getGameById(id).get().getGameState().isExtraTurn()) {
+				if (!gameService.getGameById(id).get().isExtraTurn()) {
 					snapExecutor.passTurn(snapshot);
 				}
 				gameService.removeExtraTurn(id);
@@ -197,7 +197,7 @@ public class PlayerActionService {
 				return turn;
 			}
 		}
-		if (gameService.getGameById(id).get().getGameState().isMoving()) {
+		if (gameService.getGameById(id).get().isMoving()) {
 			turn.setMessage("Waitign for a move, not a roll!");
 			turn.setRolled(snapshot.get(0).getSRolled());
 			turn.setMoves(turnExecutor.getLegalMoves(playerInTurn, turn.getRolled()));
@@ -212,7 +212,7 @@ public class PlayerActionService {
 				List<MovedMeeple> movedMeeples = snapExecutor.moveMeeple(snapshot, moving);
 				turn.setMovedMeeples(movedMeeples);
 				gameService.setRoll(id);
-				if (!gameService.getGameById(id).get().getGameState().isExtraTurn()) {
+				if (!gameService.getGameById(id).get().isExtraTurn()) {
 					snapExecutor.passTurn(snapshot);
 				}
 				gameService.removeExtraTurn(id);
