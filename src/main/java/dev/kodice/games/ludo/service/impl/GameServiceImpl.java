@@ -14,6 +14,7 @@ import dev.kodice.games.ludo.domain.model.Player;
 import dev.kodice.games.ludo.repository.GameRepository;
 import dev.kodice.games.ludo.repository.GameSnapshotRepository;
 import dev.kodice.games.ludo.repository.MeepleRepository;
+import dev.kodice.games.ludo.repository.PlayerRepository;
 import dev.kodice.games.ludo.service.GameService;
 
 @Service
@@ -27,6 +28,9 @@ public class GameServiceImpl implements GameService {
 	
 	@Autowired
 	MeepleRepository meepleRepository;
+	
+	@Autowired
+	PlayerRepository playerRepository;
 
 	@Override
 	public Game newGame(Game game) {
@@ -53,7 +57,6 @@ public class GameServiceImpl implements GameService {
 		game.setExtraTurn(false);
 		game.setRoll(true);
 		game.setRolled(0);
-		game.setMoving(false);
 		game.setPlayers(this.resetPlayers(game.getPlayers()));
 		return game;
 	}
@@ -124,7 +127,7 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public void setRolled(int dice, Long gameId) {
+	public void setDice(int dice, Long gameId) {
 		gameRepository.setRolled(dice, gameId);
 	}
 
@@ -141,6 +144,21 @@ public class GameServiceImpl implements GameService {
 	@Override
 	public void updateMeeple(Meeple meeple) {
 		meepleRepository.save(meeple);
+	}
+
+	@Override
+	public int getDice(Long id) {
+		return gameRepository.getRolled(id);
+	}
+
+	@Override
+	public List<Game> getGames() {
+		return gameRepository.findAll();
+	}
+
+	@Override
+	public List<Player> getGamePlayers(Long gameId) {
+		return playerRepository.findByGameId(gameId);
 	}
 
 }

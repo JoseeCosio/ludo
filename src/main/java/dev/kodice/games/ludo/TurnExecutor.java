@@ -32,9 +32,9 @@ public class TurnExecutor {
 		}
 	}
 
-	public List<Boolean> getLegalMoves(Player player, int dice) {
+	public List<Boolean> getLegalMoves(List<Meeple> meeples, int dice) {
 		List<Boolean> moving = new ArrayList<Boolean>();
-		for (Meeple m : player.getMeeples()) {
+		for (Meeple m : meeples) {
 			if (this.canMeepleMove(m, dice)) {
 				moving.add(true);
 			} else {
@@ -88,8 +88,8 @@ public class TurnExecutor {
 		switch (turn) {
 		case (1):
 			if (meeple.getPosition() == 0) {
-				meeple.setPosition(1);
-				meeple.setRelativePosition(1);
+				landing.setPosition(1);
+				landing.setRelativePosition(1);
 			} else {
 				landing.setRelativePosition(meeple.getRelativePosition() + dice);
 				if (meeple.getRelativePosition() > 51) {

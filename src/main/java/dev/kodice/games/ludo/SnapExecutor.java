@@ -29,10 +29,10 @@ public class SnapExecutor {
 	@Autowired
 	GameService gameService;
 
-	public Player getPlayerInTurn(List<GameSnapshot> snapshotGame) {
+	public Player getPlayerInTurn(List<GameSnapshot> snapshot) {
 		Player player = new Player();
 		List<Meeple> meeples = new ArrayList<Meeple>();
-		for (GameSnapshot game : snapshotGame) {
+		for (GameSnapshot game : snapshot) {
 			if (game.isPTurn()) {
 				if (!player.getTurn()) {
 					player.setId(game.getPId());
@@ -115,8 +115,12 @@ public class SnapExecutor {
 					Meeple m2save = game.getMeeple(turn, moving);
 					System.out.println(m2save);
 					gameService.updateMeeple(m2save);
-					MovedMeeple movedMeeple = new MovedMeeple(game.getPlayers().get(turn - 1).getId(), moving,
-							m.getPosition() - game.getRolled(), m.getPosition());
+					int initial = m.getPosition() - game.getRolled();
+					if (initial < 0) {
+						initial = 0;
+					}
+					MovedMeeple movedMeeple = new MovedMeeple(game.getPlayers().get(turn - 1).getId(), moving, initial,
+							m.getPosition());
 					moved.add(movedMeeple);
 				}
 				if (!turnExe.isCellProtected(landing.getPosition())) {
@@ -199,16 +203,19 @@ public class SnapExecutor {
 		return snap;
 	}
 
-	public GameDto frontSnapToFrontPlayerDto(List<GameSnapshot> snapshot) {
+	public GameDto snap2playerDto(List<GameSnapshot> snapshot) {
 		List<FrontPlayerDto> players = new ArrayList<FrontPlayerDto>();
+		List<FrontPlayerDto> front = new ArrayList<FrontPlayerDto>();
 		List<Long> meeples = new ArrayList<Long>();
-		GameDto gameDto = new GameDto();
+		List<Long> meeple = new ArrayList<Long>();
+		front.add(new FrontPlayerDto(meeples));
+		GameDto gameDto = new GameDto(0,"",0,front);
 		int index = 0;
 		for (GameSnapshot g : snapshot) {
 			if (index % 4 == 0) {
-				players.add(new FrontPlayerDto());
-				if(g.isPTurn()) {
-					gameDto.setPlayerTurn(index/4+1);
+				players.add(new FrontPlayerDto(meeple));
+				if (g.isPTurn()) {
+					gameDto.setPlayerTurn(index / 4 + 1);
 				}
 			}
 			meeples.add((long) g.getMPos());
@@ -220,9 +227,9 @@ public class SnapExecutor {
 		}
 		gameDto.setPlayers(players);
 		gameDto.setDice(snapshot.get(0).getSRolled());
-		if(snapshot.get(0).isSRoll()) {
+		if (snapshot.get(0).isSRoll()) {
 			gameDto.setRequiredAction("roll");
-		}else {
+		} else {
 			gameDto.setRequiredAction("move");
 		}
 		return gameDto;

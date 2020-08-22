@@ -8,5 +8,9 @@ import lombok.Data;
 public class FrontPlayerDto {
 
 	private List<Long> meeples;
+
+	public FrontPlayerDto(List<Long> meeples) {
+		this.meeples = meeples;
+	}
 	
 }

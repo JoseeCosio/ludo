@@ -30,11 +30,17 @@ public interface GameService {
 	
 	void removeExtraTurn(Long gameId);
 
-	void setRolled(int dice, Long id);
+	void setDice(int dice, Long id);
+	
+	int getDice(Long id);
 
 	void setRoll(Long id);
 
 	void setMove(Long id);
 	
 	void updateMeeple(Meeple meeple);
+
+	List<Game> getGames();
+
+	List<Player> getGamePlayers(Long gameId);
 }

@@ -21,11 +21,14 @@ public interface GameRepository extends JpaRepository<Game, Long> {
 	void setRolled(int dice, Long gameId);
 
 	@Modifying
-	@Query(value = "UPDATE game SET roll='true', moving='false' where game.id=:gameId ;", nativeQuery = true)
+	@Query(value = "UPDATE game SET roll='true' where game.id=:gameId ;", nativeQuery = true)
 	void setRoll(Long gameId);
 
 	@Modifying
-	@Query(value = "UPDATE game SET roll='false', moving='true' where game.id=:gameId ;", nativeQuery = true)
+	@Query(value = "UPDATE game SET roll='false' where game.id=:gameId ;", nativeQuery = true)
 	void setMove(Long gameId);
+
+	@Query(value = "SELECT rolled from GAME where game.id=:id ;", nativeQuery = true)
+	int getRolled(Long id);
 
 }

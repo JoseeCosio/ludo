@@ -40,8 +40,6 @@ public class Game {
 
 	private boolean roll;
 
-	private boolean moving;
-
 	private int rolled;
 
 	public Game() {
@@ -58,7 +56,6 @@ public class Game {
 		this.extraTurn = false;
 		this.roll = true;
 		this.rolled = 0;
-		this.moving = false;
 		this.players = players;
 	}
 
@@ -76,7 +73,6 @@ public class Game {
 		this.extraTurn = false;
 		this.roll = true;
 		this.rolled = 0;
-		this.moving = false;
 		this.players = players;
 	}
 

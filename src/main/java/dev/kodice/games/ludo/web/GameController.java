@@ -1,5 +1,6 @@
 package dev.kodice.games.ludo.web;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.transaction.Transactional;
@@ -23,6 +24,7 @@ import dev.kodice.games.ludo.domain.dto.RegisterDto;
 import dev.kodice.games.ludo.domain.dto.TurnDto;
 import dev.kodice.games.ludo.domain.model.Game;
 import dev.kodice.games.ludo.domain.model.GameSnapshot;
+import dev.kodice.games.ludo.domain.model.Player;
 import dev.kodice.games.ludo.domain.model.Session;
 import dev.kodice.games.ludo.service.GameService;
 import dev.kodice.games.ludo.service.PlayerActionService;
@@ -51,6 +53,26 @@ public class GameController {
 		Game game = new Game(4);
 		gameService.newGame(game);
 		return game.getId();
+	}
+	
+	@GetMapping()
+	public List<Long> getGames(){
+		List<Game> games = gameService.getGames();
+		List<Long> index = new ArrayList<Long>();
+		for(Game g:games) {
+			index.add(g.getId());
+		}
+		return index;
+	}
+
+	@GetMapping("/{gameId}/players")
+	public List<Long> getPlayersByGameId(@PathVariable Long gameId){
+		List<Player> players = gameService.getGamePlayers(gameId);
+		List<Long> index = new ArrayList<Long>();
+		for(Player p:players) {
+			index.add(p.getId());
+		}
+		return index;
 	}
 
 	@GetMapping("/reset/{id}")

@@ -15,8 +15,6 @@ public class GameSnapshot {
 
 	private int sRolled;
 
-	private boolean sMove;
-
 	private Long pId;
 	
 	private String pKey;
@@ -34,7 +32,6 @@ public class GameSnapshot {
 		FrontSnapshot snap = new FrontSnapshot();
 		snap.setSRoll(this.sRoll);
 		snap.setSRolled(this.sRolled);
-		snap.setSMove(this.sMove);
 		snap.setPTurn(this.pTurn);
 		snap.setMPos(this.mPos);
 		return snap;

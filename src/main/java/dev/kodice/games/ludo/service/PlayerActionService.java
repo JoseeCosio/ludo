@@ -30,7 +30,7 @@ public class PlayerActionService {
 		List<GameSnapshot> snapshot = gameService.getSnapshot(id);
 		TurnDto turn = new TurnDto();
 		if (action.isSincronize()) {
-			return this.getActionRequired(snapshot, key);
+			return this.getRequiredAction(snapshot, key);
 		}
 		if (action.isRoll()) {
 			return this.rollDice(id, snapshot, key);
@@ -40,59 +40,38 @@ public class PlayerActionService {
 		}
 		return turn;
 	}
-	
-	public TurnDto getTurnNoKey(Long id, PlayerActionDto action) {
-		List<GameSnapshot> snapshot = gameService.getSnapshot(id);
-		TurnDto turn = new TurnDto();
-		if (action.isSincronize()) {
-			return this.getActionRequiredNoKey(snapshot);
-		}
-		if (action.isRoll()) {
-			return this.rollDiceNoKey(id, snapshot);
-		}
-		if (action.getMove() > 0) {
-			return this.moveMeepleNoKey(id, snapshot, action.getMove());
-		}
-		return turn;
-	}
 
-	private TurnDto getActionRequired(List<GameSnapshot> snapshot, String key) {
+	public TurnDto getRequiredAction(List<GameSnapshot> snapshot, String key) {
 		TurnDto turn = new TurnDto();
-		Player playerInTurn = snapExecutor.getPlayerInTurn(snapshot);
-		if (snapExecutor.isKeyFromGame(key, snapshot)) {
-			turn.setPlayerInTurn(snapExecutor.getPlayerToRoll(snapshot));
-			if (snapshot.get(0).isSRoll()) {
-				turn.setMessage("Waiting " + turn.getPlayerInTurn() + " player to roll!");
-				return turn;
-			}
-			if (snapshot.get(0).isSMove()) {
-				turn.setRolled(snapshot.get(0).getSRolled());
-				turn.setMoves(turnExecutor.getLegalMoves(playerInTurn, snapshot.get(0).getSRolled()));
-				turn.setMessage("Waiting " + turn.getPlayerInTurn() + " player to choose a move!");
-				return turn;
-			}
-		} else {
-			turn.setMessage("Not playing that game!");
+		turn.setPlayerInTurn(snapExecutor.getPlayerToRoll(snapshot));
+		if (snapshot.get(0).isSRoll()) {
+			turn.setMessage("Waiting " + turn.getPlayerInTurn() + " player to roll!");
+			return turn;
+		}
+		if (!snapshot.get(0).isSRoll()) {
+			turn.setDice(snapshot.get(0).getSRolled());
+			turn.setMoves(turnExecutor.getLegalMoves(snapExecutor.getPlayerInTurn(snapshot).getMeeples(),
+					snapshot.get(0).getSRolled()));
+			turn.setMessage("Waiting " + turn.getPlayerInTurn() + " player to choose a move!");
 			return turn;
 		}
 		return turn;
 	}
 
-	private TurnDto rollDice(Long id, List<GameSnapshot> snapshot, String key) {
+	public TurnDto rollDice(Long id, List<GameSnapshot> snapshot, String key) {
 		TurnDto turn = new TurnDto();
-		Player playerInTurn = snapExecutor.getPlayerInTurn(snapshot);
-		if (playerInTurn.getKey().equals(key)) {
+		if (snapExecutor.getPlayerInTurn(snapshot).getKey().equals(key)) {
 			if (snapshot.get(0).isSRoll()) {
 				int dice = turnExecutor.rollDice();
 				if (dice == 6) {
 					gameService.setExtraTurn(id);
 				}
 				List<Boolean> legalMoves = new ArrayList<Boolean>();
-				legalMoves = turnExecutor.getLegalMoves(playerInTurn, dice);
+				legalMoves = turnExecutor.getLegalMoves(snapExecutor.getPlayerInTurn(snapshot).getMeeples(), dice);
 				turn.setMoves(legalMoves);
 				int moves = turnExecutor.getNumberOfLegalMoves(legalMoves);
-				turn.setRolled(dice);
-				gameService.setRolled(dice, id);
+				turn.setDice(dice);
+				gameService.setDice(dice, id);
 				if (moves == 0) {
 					gameService.removeExtraTurn(id);
 					snapExecutor.passTurn(snapshot);
@@ -111,10 +90,11 @@ public class PlayerActionService {
 					return turn;
 				}
 			}
-			if (!gameService.getGameById(id).get().isMoving()) {
+			if (!gameService.getGameById(id).get().isRoll()) {
 				turn.setMessage("Waitign for a move, not a roll!");
-				turn.setRolled(snapshot.get(0).getSRolled());
-				turn.setMoves(turnExecutor.getLegalMoves(playerInTurn, turn.getRolled()));
+				turn.setDice(snapshot.get(0).getSRolled());
+				turn.setMoves(turnExecutor.getLegalMoves(snapExecutor.getPlayerInTurn(snapshot).getMeeples(),
+						turn.getDice()));
 				return turn;
 			}
 		} else {
@@ -124,11 +104,11 @@ public class PlayerActionService {
 		return turn;
 	}
 
-	private TurnDto moveMeeple(Long id, List<GameSnapshot> snapshot, String key, int moving) {
+	public TurnDto moveMeeple(Long id, List<GameSnapshot> snapshot, String key, int moving) {
 		TurnDto turn = new TurnDto();
 		Player playerInTurn = snapExecutor.getPlayerInTurn(snapshot);
 		if (playerInTurn.getKey().equals(key)) {
-			if (snapshot.get(0).isSMove()) {
+			if (!snapshot.get(0).isSRoll()) {
 				List<MovedMeeple> movedMeeples = snapExecutor.moveMeeple(snapshot, moving);
 				turn.setMovedMeeples(movedMeeples);
 				gameService.setRoll(id);
@@ -146,82 +126,6 @@ public class PlayerActionService {
 			turn.setMessage("Not that player!");
 			return turn;
 		}
-	}
-
-	public TurnDto getActionRequiredNoKey(List<GameSnapshot> snapshot) {
-		TurnDto turn = new TurnDto();
-		Player playerInTurn = snapExecutor.getPlayerInTurn(snapshot);
-		turn.setPlayerInTurn(snapExecutor.getPlayerToRoll(snapshot));
-		if (snapshot.get(0).isSRoll()) {
-			turn.setMessage("Waiting " + turn.getPlayerInTurn() + " player to roll!");
-			return turn;
-		}
-		if (snapshot.get(0).isSMove()) {
-			turn.setRolled(snapshot.get(0).getSRolled());
-			turn.setMoves(turnExecutor.getLegalMoves(playerInTurn, snapshot.get(0).getSRolled()));
-			turn.setMessage("Waiting " + turn.getPlayerInTurn() + " player to choose a move!");
-			return turn;
-		}
-		return turn;
-	}
-
-	public TurnDto rollDiceNoKey(Long id, List<GameSnapshot> snapshot) {
-		TurnDto turn = new TurnDto();
-		Player playerInTurn = snapExecutor.getPlayerInTurn(snapshot);
-		if (snapshot.get(0).isSRoll()) {
-			int dice = turnExecutor.rollDice();
-			if (dice == 6) {
-				gameService.setExtraTurn(id);
-			}
-			List<Boolean> legalMoves = new ArrayList<Boolean>();
-			legalMoves = turnExecutor.getLegalMoves(playerInTurn, dice);
-			turn.setMoves(legalMoves);
-			int moves = turnExecutor.getNumberOfLegalMoves(legalMoves);
-			turn.setRolled(dice);
-			gameService.setRolled(dice, id);
-			if (moves == 0) {
-				gameService.removeExtraTurn(id);
-				snapExecutor.passTurn(snapshot);
-				return turn;
-			}
-			if (moves == 1) {
-				turn.setMovedMeeples(snapExecutor.moveMeeple(snapshot, turnExecutor.getLegalMove(legalMoves),dice));
-				if (!gameService.getGameById(id).get().isExtraTurn()) {
-					snapExecutor.passTurn(snapshot);
-				}
-				gameService.removeExtraTurn(id);
-				return turn;
-			}
-			if (moves > 1) {
-				gameService.setMove(id);
-				return turn;
-			}
-		}
-		if (gameService.getGameById(id).get().isMoving()) {
-			turn.setMessage("Waitign for a move, not a roll!");
-			turn.setRolled(snapshot.get(0).getSRolled());
-			turn.setMoves(turnExecutor.getLegalMoves(playerInTurn, turn.getRolled()));
-			return turn;
-		}
-		return turn;
-	}
-
-	public TurnDto moveMeepleNoKey(Long id, List<GameSnapshot> snapshot, int moving) {
-		TurnDto turn = new TurnDto();
-			if (snapshot.get(0).isSMove()) {
-				List<MovedMeeple> movedMeeples = snapExecutor.moveMeeple(snapshot, moving);
-				turn.setMovedMeeples(movedMeeples);
-				gameService.setRoll(id);
-				if (!gameService.getGameById(id).get().isExtraTurn()) {
-					snapExecutor.passTurn(snapshot);
-				}
-				gameService.removeExtraTurn(id);
-				turn.setPlayerInTurn(snapExecutor.getPlayerToRoll(snapshot));
-				return turn;
-			} else {
-				turn.setMessage("Waiting for a roll, not a move!");
-				return turn;
-			}
 	}
 
 }
