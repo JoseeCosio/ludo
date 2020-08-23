@@ -9,14 +9,6 @@ import dev.kodice.games.ludo.domain.model.Game;
 public interface GameRepository extends JpaRepository<Game, Long> {
 
 	@Modifying
-	@Query(value = "UPDATE game SET extra_turn='true' where game.id=:gameId ;", nativeQuery = true)
-	void setExtraTurn(Long gameId);
-
-	@Modifying
-	@Query(value = "UPDATE game SET extra_turn='false' where game.id=:gameId ;", nativeQuery = true)
-	void removeExtraTurn(Long gameId);
-
-	@Modifying
 	@Query(value = "UPDATE game SET rolled=:dice where game.id=:gameId ;", nativeQuery = true)
 	void setRolled(int dice, Long gameId);
 
@@ -27,8 +19,5 @@ public interface GameRepository extends JpaRepository<Game, Long> {
 	@Modifying
 	@Query(value = "UPDATE game SET roll='false' where game.id=:gameId ;", nativeQuery = true)
 	void setMove(Long gameId);
-
-	@Query(value = "SELECT rolled from GAME where game.id=:id ;", nativeQuery = true)
-	int getRolled(Long id);
 
 }

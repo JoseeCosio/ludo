@@ -35,8 +35,6 @@ public class Game {
 					@JoinColumn(name = "player_id", referencedColumnName = "id") })
 	private List<Player> players;
 
-	private boolean extraTurn;
-
 	private boolean roll;
 
 	private int rolled;
@@ -52,7 +50,6 @@ public class Game {
 			}
 			players.add(player);
 		}
-		this.extraTurn = false;
 		this.roll = true;
 		this.rolled = 0;
 		this.players = players;
@@ -69,7 +66,6 @@ public class Game {
 			}
 			players.add(player);
 		}
-		this.extraTurn = false;
 		this.roll = true;
 		this.rolled = 0;
 		this.players = players;

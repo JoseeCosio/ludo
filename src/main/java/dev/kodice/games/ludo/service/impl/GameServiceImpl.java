@@ -54,7 +54,6 @@ public class GameServiceImpl implements GameService {
 
 	@Override
 	public Game reset(Game game) {
-		game.setExtraTurn(false);
 		game.setRoll(true);
 		game.setRolled(0);
 		game.setPlayers(this.resetPlayers(game.getPlayers()));
@@ -114,16 +113,6 @@ public class GameServiceImpl implements GameService {
 	@Override
 	public List<GameSnapshot> getSnapshot(Long gameId) {
 		return gameSnapshotRepository.findAllBygId(gameId);
-	}
-
-	@Override
-	public void setExtraTurn(Long gameId) {
-		gameRepository.setExtraTurn(gameId);
-	}
-
-	@Override
-	public void removeExtraTurn(Long gameId) {
-		gameRepository.removeExtraTurn(gameId);
 	}
 
 	@Override

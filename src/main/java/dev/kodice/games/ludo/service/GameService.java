@@ -26,10 +26,6 @@ public interface GameService {
 	
 	List<GameSnapshot> getSnapshot(Long gameId);
 	
-	void setExtraTurn(Long gameId);
-	
-	void removeExtraTurn(Long gameId);
-
 	void setDice(int dice, Long id);
 	
 	void setRoll(Long id);
