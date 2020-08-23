@@ -16,7 +16,6 @@ import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import dev.kodice.games.ludo.TurnExecutor;
 import dev.kodice.games.ludo.domain.dto.Landing;
 import dev.kodice.games.ludo.domain.dto.MovedMeeple;
 import lombok.Data;
@@ -97,6 +96,13 @@ public class Game {
 		this.players.set(player - 1, p);
 	}
 
+	
+	/* 
+	 * Kicks any enemy quantity of meeples if not in protected cell
+	 * 
+	 * Needed to validate to protect meeples when grouped
+	 * 
+	 * */
 	public List<MovedMeeple> kickMeeples(int landing, int player) {
 		List<MovedMeeple> movedMeeples = new ArrayList<MovedMeeple>();
 		int kicked = 0;
@@ -133,32 +139,4 @@ public class Game {
 		return movedMeeples;
 	}
 
-	public List<MovedMeeple> moveMeeple(int dice, int moving) {
-		List<MovedMeeple> moved = new ArrayList<MovedMeeple>();
-		int turn = 1;
-		TurnExecutor turnExe = new TurnExecutor();
-		for (Player p : this.getPlayers()) {
-			if (p.getTurn()) {
-				Meeple m = this.getMeeple(turn, moving);
-				Landing landing = turnExe.getLandingCell(m, dice, turn);
-				if (turnExe.canMeepleMove(m, dice)) {
-					this.updateMeeple(turn, moving, landing);
-					MovedMeeple movedMeeple = new MovedMeeple(this.getPlayers().get(turn - 1).getId(), moving,
-							m.getPosition() - dice, m.getPosition());
-					moved.add(movedMeeple);
-				}
-				if (!turnExe.isCellProtected(landing.getPosition())) {
-					List<MovedMeeple> movedMeeples = this.kickMeeples(landing.getPosition(), turn);
-					if (movedMeeples.size() > 0) {
-						moved.addAll(movedMeeples);
-					}
-				}
-				if (landing.getPosition() == 57) {
-					this.setExtraTurn(true);
-				}
-			}
-			turn++;
-		}
-		return moved;
-	}
 }

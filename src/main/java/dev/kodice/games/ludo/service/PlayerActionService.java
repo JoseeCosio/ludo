@@ -12,7 +12,6 @@ import dev.kodice.games.ludo.domain.dto.MovedMeeple;
 import dev.kodice.games.ludo.domain.dto.PlayerActionDto;
 import dev.kodice.games.ludo.domain.dto.TurnDto;
 import dev.kodice.games.ludo.domain.model.GameSnapshot;
-import dev.kodice.games.ludo.domain.model.Player;
 
 @Service
 public class PlayerActionService {
@@ -63,9 +62,6 @@ public class PlayerActionService {
 		if (snapExecutor.getPlayerInTurn(snapshot).getKey().equals(key)) {
 			if (snapshot.get(0).isSRoll()) {
 				int dice = turnExecutor.rollDice();
-				if (dice == 6) {
-					gameService.setExtraTurn(id);
-				}
 				List<Boolean> legalMoves = new ArrayList<Boolean>();
 				legalMoves = turnExecutor.getLegalMoves(snapExecutor.getPlayerInTurn(snapshot).getMeeples(), dice);
 				turn.setMoves(legalMoves);
@@ -73,24 +69,24 @@ public class PlayerActionService {
 				turn.setDice(dice);
 				gameService.setDice(dice, id);
 				if (moves == 0) {
-					gameService.removeExtraTurn(id);
 					snapExecutor.passTurn(snapshot);
 					return turn;
 				}
 				if (moves == 1) {
-					turn.setMovedMeeples(snapExecutor.moveMeeple(snapshot, turnExecutor.getLegalMove(legalMoves)));
-					if (!gameService.getGameById(id).get().isExtraTurn()) {
+					turn.setMovedMeeples(
+							snapExecutor.moveMeeple(snapshot, turnExecutor.getLegalMove(legalMoves), dice));
+					if (turn.getMovedMeeples().size() == 1
+							&& turn.getMovedMeeples().get(0).getLandingRelativePosition() != 57) {
 						snapExecutor.passTurn(snapshot);
 					}
-					gameService.removeExtraTurn(id);
 					return turn;
 				}
-				if (moves > 1) {
+				if (moves > 1) {// validate if all moves give same result
 					gameService.setMove(id);
 					return turn;
 				}
 			}
-			if (!gameService.getGameById(id).get().isRoll()) {
+			if (!snapshot.get(0).isSRoll()) {
 				turn.setMessage("Waitign for a move, not a roll!");
 				turn.setDice(snapshot.get(0).getSRolled());
 				turn.setMoves(turnExecutor.getLegalMoves(snapExecutor.getPlayerInTurn(snapshot).getMeeples(),
@@ -106,17 +102,19 @@ public class PlayerActionService {
 
 	public TurnDto moveMeeple(Long id, List<GameSnapshot> snapshot, String key, int moving) {
 		TurnDto turn = new TurnDto();
-		Player playerInTurn = snapExecutor.getPlayerInTurn(snapshot);
-		if (playerInTurn.getKey().equals(key)) {
+		int passTurn = 0;
+		if (snapExecutor.getPlayerInTurn(snapshot).getKey().equals(key)) {
 			if (!snapshot.get(0).isSRoll()) {
-				List<MovedMeeple> movedMeeples = snapExecutor.moveMeeple(snapshot, moving);
+				List<MovedMeeple> movedMeeples = snapExecutor.moveMeeple(snapshot, moving,
+						snapshot.get(0).getSRolled());
 				turn.setMovedMeeples(movedMeeples);
-				gameService.setRoll(id);
-				if (!gameService.getGameById(id).get().isExtraTurn()) {
+				if (turn.getMovedMeeples().size() == 1 && snapshot.get(0).getSRolled() != 6
+						&& turn.getMovedMeeples().get(0).getLandingRelativePosition() != 57) {
 					snapExecutor.passTurn(snapshot);
+					passTurn++;
 				}
-				gameService.removeExtraTurn(id);
-				turn.setPlayerInTurn(snapExecutor.getPlayerToRoll(snapshot));
+				gameService.setRoll(id);
+				turn.setPlayerInTurn((snapExecutor.getPlayerToRoll(snapshot) - 1 + passTurn) % 4 + 1);
 				return turn;
 			} else {
 				turn.setMessage("Waiting for a roll, not a move!");

@@ -32,8 +32,6 @@ public interface GameService {
 
 	void setDice(int dice, Long id);
 	
-	int getDice(Long id);
-
 	void setRoll(Long id);
 
 	void setMove(Long id);

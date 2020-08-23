@@ -8,4 +8,5 @@ public class Landing {
 	private int position;
 	
 	private int relativePosition;
+	
 }

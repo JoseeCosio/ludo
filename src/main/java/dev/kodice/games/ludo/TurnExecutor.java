@@ -85,6 +85,7 @@ public class TurnExecutor {
 
 	public Landing getLandingCell(Meeple meeple, int dice, int turn) {
 		Landing landing = new Landing();
+		System.out.println("Player " + turn + " meeple " + meeple + " and dice " + dice);
 		switch (turn) {
 		case (1):
 			if (meeple.getPosition() == 0) {
@@ -92,8 +93,8 @@ public class TurnExecutor {
 				landing.setRelativePosition(1);
 			} else {
 				landing.setRelativePosition(meeple.getRelativePosition() + dice);
-				if (meeple.getRelativePosition() > 51) {
-					landing.setPosition(meeple.getRelativePosition() + 1);
+				if (landing.getRelativePosition() > 51) {
+					landing.setPosition(landing.getRelativePosition() + 1);
 				} else
 					landing.setPosition(meeple.getPosition() + dice);
 			}
@@ -104,10 +105,10 @@ public class TurnExecutor {
 				landing.setRelativePosition(1);
 			} else {
 				landing.setRelativePosition(meeple.getRelativePosition() + dice);
-				if (meeple.getRelativePosition() > 51) {
-					landing.setPosition(meeple.getRelativePosition() + 7);
+				if (landing.getRelativePosition() > 51) {
+					landing.setPosition(landing.getRelativePosition() + 7);
 				} else {
-					if (meeple.getPosition() == 52) {
+					if (meeple.getPosition() + dice == 52) {
 						landing.setPosition(52);
 					} else {
 						landing.setPosition((meeple.getPosition() + dice) % 52);
@@ -121,10 +122,10 @@ public class TurnExecutor {
 				landing.setRelativePosition(1);
 			} else {
 				landing.setRelativePosition(meeple.getRelativePosition() + dice);
-				if (meeple.getRelativePosition() > 51) {
-					landing.setPosition(meeple.getRelativePosition() + 13);
+				if (landing.getRelativePosition() > 51) {
+					landing.setPosition(landing.getRelativePosition() + 13);
 				} else {
-					if (meeple.getPosition() == 52) {
+					if (meeple.getPosition() + dice == 52) {
 						landing.setPosition(52);
 					} else {
 						landing.setPosition((meeple.getPosition() + dice) % 52);
@@ -138,8 +139,8 @@ public class TurnExecutor {
 				landing.setRelativePosition(1);
 			} else {
 				landing.setRelativePosition(meeple.getRelativePosition() + dice);
-				if (meeple.getRelativePosition() > 51) {
-					landing.setPosition(meeple.getRelativePosition() + 19);
+				if (landing.getRelativePosition() > 51) {
+					landing.setPosition(landing.getRelativePosition() + 19);
 				} else {
 					if (meeple.getPosition() + dice == 52) {
 						landing.setPosition(52);
@@ -152,7 +153,7 @@ public class TurnExecutor {
 		default:
 			break;
 		}
-
+		System.out.println(landing);
 		return landing;
 	}
 

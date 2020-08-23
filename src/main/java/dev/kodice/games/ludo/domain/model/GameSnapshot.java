@@ -3,10 +3,13 @@ package dev.kodice.games.ludo.domain.model;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
+import org.hibernate.annotations.Immutable;
+
 import lombok.Data;
 
 @Data
 @Entity
+@Immutable
 public class GameSnapshot {
 	
 	private Long gId;

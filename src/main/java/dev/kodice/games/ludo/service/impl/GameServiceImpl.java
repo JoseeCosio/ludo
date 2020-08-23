@@ -147,11 +147,6 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public int getDice(Long id) {
-		return gameRepository.getRolled(id);
-	}
-
-	@Override
 	public List<Game> getGames() {
 		return gameRepository.findAll();
 	}

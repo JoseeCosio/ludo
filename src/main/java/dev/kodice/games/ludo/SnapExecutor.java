@@ -50,10 +50,11 @@ public class SnapExecutor {
 		return player;
 	}
 
-	public boolean isKeyFromGame(String key, List<GameSnapshot> snapshotGame) {
-		for (GameSnapshot g : snapshotGame) {
-			if (g.getPKey().equals(key))
+	public boolean isKeyFromGame(String key, List<GameSnapshot> snapshot) {
+		for (GameSnapshot g : snapshot) {
+			if (g.getPKey().equals(key)) {
 				return true;
+			}
 		}
 		return false;
 	}
@@ -92,36 +93,32 @@ public class SnapExecutor {
 		playerRepository.setTurn(index.get((turn + 1) % 4));
 	}
 
-	public List<MovedMeeple> moveMeeple(List<GameSnapshot> snapshot, int moving) {
-		Game game = this.snapshotToGameState(snapshot);
-		return this.move(game, moving);
-	}
-
 	public List<MovedMeeple> moveMeeple(List<GameSnapshot> snapshot, int moving, int dice) {
-		Game game = this.snapshotToGameState(snapshot, dice);
-		return this.move(game, moving);
+		Game game = this.snapshotToGameState(snapshot);
+		return this.move(game, moving, dice);
 	}
 
-	private List<MovedMeeple> move(Game game, int moving) {
+	private List<MovedMeeple> move(Game game, int moving, int dice) {
 		List<MovedMeeple> moved = new ArrayList<MovedMeeple>();
 		int turn = 1;
 		TurnExecutor turnExe = new TurnExecutor();
 		for (Player p : game.getPlayers()) {
 			if (p.getTurn()) {
 				Meeple m = game.getMeeple(turn, moving);
-				Landing landing = turnExe.getLandingCell(m, game.getRolled(), turn);
-				if (turnExe.canMeepleMove(m, game.getRolled())) {
+				Landing landing = turnExe.getLandingCell(m, dice, turn);
+				if (turnExe.canMeepleMove(m, dice)) {
 					game.updateMeeple(turn, moving, landing);
 					Meeple m2save = game.getMeeple(turn, moving);
-					System.out.println(m2save);
 					gameService.updateMeeple(m2save);
-					int initial = m.getPosition() - game.getRolled();
+					int initial = m.getPosition() - dice;
 					if (initial < 0) {
 						initial = 0;
 					}
 					MovedMeeple movedMeeple = new MovedMeeple(game.getPlayers().get(turn - 1).getId(), moving, initial,
-							m.getPosition());
+							m.getPosition(),landing.getRelativePosition());
 					moved.add(movedMeeple);
+				} else {
+					// validate wrong moving input
 				}
 				if (!turnExe.isCellProtected(landing.getPosition())) {
 					List<MovedMeeple> movedMeeples = game.kickMeeples(landing.getPosition(), turn);
@@ -132,9 +129,6 @@ public class SnapExecutor {
 						moved.addAll(movedMeeples);
 					}
 				}
-				if (landing.getPosition() == 57) {
-					game.setExtraTurn(true);
-				}
 			}
 			turn++;
 		}
@@ -144,12 +138,6 @@ public class SnapExecutor {
 	public Game snapshotToGameState(List<GameSnapshot> snapshot) {
 		Game game = this.snapToGame(snapshot);
 		game.setRolled(snapshot.get(0).getSRolled());
-		return game;
-	}
-
-	public Game snapshotToGameState(List<GameSnapshot> snapshot, int dice) {
-		Game game = this.snapToGame(snapshot);
-		game.setRolled(dice);
 		return game;
 	}
 
@@ -209,7 +197,7 @@ public class SnapExecutor {
 		List<Long> meeples = new ArrayList<Long>();
 		List<Long> meeple = new ArrayList<Long>();
 		front.add(new FrontPlayerDto(meeples));
-		GameDto gameDto = new GameDto(0,"",0,front);
+		GameDto gameDto = new GameDto(0, "", 0, front);
 		int index = 0;
 		for (GameSnapshot g : snapshot) {
 			if (index % 4 == 0) {

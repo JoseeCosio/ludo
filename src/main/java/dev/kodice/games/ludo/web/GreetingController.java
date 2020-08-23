@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 import dev.kodice.games.ludo.SnapExecutor;
 import dev.kodice.games.ludo.domain.dto.TurnDto;
@@ -32,15 +31,18 @@ public class GreetingController {
 	@Transactional
 	@MessageMapping("/hello")
 	@SendTo("/topic/greetings")
-	public TurnDto greeting(HelloMessage message, @RequestHeader String key) throws Exception {
+	public TurnDto greeting(HelloMessage message) throws Exception {
+		System.out.println(message);
+		String key = message.getKey();
 		TurnDto turn = new TurnDto();
 		if (message.getName().startsWith("sync")) {
 			List<GameSnapshot> snapshot = gameService.getSnapshot(Long.parseLong(message.getName().substring(5)));
 			if (snap.isKeyFromGame(key, snapshot)) {
 				turn = playerActionService.getRequiredAction(snapshot, key);
 				turn.setGame(snap.snap2playerDto(snapshot));
+			} else {
+				turn.setMessage("Not valid key mate");
 			}
-			turn.setMessage("Not valid key mate");
 			return turn;
 		}
 		if (message.getName().startsWith("roll")) {
@@ -48,10 +50,16 @@ public class GreetingController {
 			List<GameSnapshot> snapshot = gameService.getSnapshot(id);
 			if (snap.isKeyFromGame(key, snapshot)) {
 				turn = playerActionService.rollDice(id, snapshot, key);
-				turn.setGame(snap.snap2playerDto(snapshot));
+				if(turn.getMovedMeeples().get(0).getMeeple()!=0) {
+					turn.updateSnapshot(turn.getMovedMeeples(), snapshot);
+				}
+				else {
+					turn.setGame(snap.snap2playerDto(snapshot));
+				}
 				return turn;
+			} else {
+				turn.setMessage("Not valid key mate");
 			}
-			turn.setMessage("Not valid key mate");
 			return turn;
 		}
 		if (message.getName().startsWith("move")) {
@@ -60,9 +68,15 @@ public class GreetingController {
 			if (snap.isKeyFromGame(key, snapshot)) {
 				turn = playerActionService.moveMeeple(id, snapshot, key,
 						Integer.parseInt(message.getName().substring(5, 6)));
-				turn.setGame(snap.snap2playerDto(snapshot));
+				if(turn.getMovedMeeples().get(0).getMeeple()!=0) {
+					turn.updateSnapshot(turn.getMovedMeeples(), snapshot);
+				}
+				else {
+					turn.setGame(snap.snap2playerDto(snapshot));
+				}
+			} else {
+				turn.setMessage("Not valid key mate");
 			}
-			turn.setMessage("Not valid key mate");
 			return turn;
 		}
 		turn.setMessage("Syntaxis error, check greetings manual to KodiceLudo at dev.kodice/games/ludo.js");

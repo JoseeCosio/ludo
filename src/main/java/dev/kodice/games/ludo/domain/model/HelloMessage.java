@@ -10,5 +10,7 @@ import lombok.NoArgsConstructor;
 public class HelloMessage {
 
 	private String name;
-
+	
+	private String key;
+	
 }

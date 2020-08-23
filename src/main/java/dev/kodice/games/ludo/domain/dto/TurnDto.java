@@ -3,13 +3,15 @@ package dev.kodice.games.ludo.domain.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import dev.kodice.games.ludo.SnapExecutor;
 import dev.kodice.games.ludo.domain.dto.front.FrontPlayerDto;
 import dev.kodice.games.ludo.domain.dto.front.GameDto;
+import dev.kodice.games.ludo.domain.model.GameSnapshot;
 import lombok.Data;
 
 @Data
 public class TurnDto {
-
+	
 	private int playerInTurn;
 
 	private int dice;
@@ -31,7 +33,7 @@ public class TurnDto {
 		}
 		this.moves = boolMoves;
 		List<MovedMeeple> moved = new ArrayList<MovedMeeple>();
-		moved.add(new MovedMeeple(0L,0,0,0));
+		moved.add(new MovedMeeple());
 		this.movedMeeples = moved;
 		this.message = "";
 		List<FrontPlayerDto> front = new ArrayList<FrontPlayerDto>();
@@ -43,6 +45,22 @@ public class TurnDto {
 			front.add(new FrontPlayerDto(meeples));
 		}
 		this.game = new GameDto(0,"",0,front);
+	}
+	
+	public void updateSnapshot(List<MovedMeeple> changes,List<GameSnapshot> snapshot) {
+		for(MovedMeeple m:changes) {
+			int index = 1;
+			for(GameSnapshot g:snapshot) {
+				if(g.getPId().equals(m.getPlayerId())) {
+					if(index==m.getMeeple()) {
+						g.setMPos(m.getFinalPosition());
+					}
+					index++;
+				}
+			}
+		}
+		SnapExecutor snap = new SnapExecutor();
+		this.game = snap.snap2playerDto(snapshot);
 	}
 
 }
