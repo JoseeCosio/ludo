@@ -43,7 +43,7 @@ public class GameController {
 
 	@Autowired
 	SnapExecutor snapExecutor;
-	
+
 	@Autowired
 	PlayerActionService playerActionService;
 
@@ -55,21 +55,35 @@ public class GameController {
 		return game.getId();
 	}
 	
+	@GetMapping("/newGame/{players}")
+	@ResponseStatus(code = HttpStatus.CREATED)
+	public Long newGame(@PathVariable int players) {
+		if (players > 1 && players < 4) {
+			Game game = new Game(players);
+			gameService.newGame(game);
+			return game.getId();
+		} else {
+			Game game = new Game(4);
+			gameService.newGame(game);
+			return game.getId();
+		}
+	}
+
 	@GetMapping()
-	public List<Long> getGames(){
+	public List<Long> getGames() {
 		List<Game> games = gameService.getGames();
 		List<Long> index = new ArrayList<Long>();
-		for(Game g:games) {
+		for (Game g : games) {
 			index.add(g.getId());
 		}
 		return index;
 	}
 
 	@GetMapping("/{gameId}/players")
-	public List<Long> getPlayersByGameId(@PathVariable Long gameId){
+	public List<Long> getPlayersByGameId(@PathVariable Long gameId) {
 		List<Player> players = gameService.getGamePlayers(gameId);
 		List<Long> index = new ArrayList<Long>();
-		for(Player p:players) {
+		for (Player p : players) {
 			index.add(p.getId());
 		}
 		return index;
