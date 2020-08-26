@@ -77,7 +77,7 @@ public class SnapExecutor {
 	}
 
 	public void passTurn(List<GameSnapshot> snapshot) {
-		int playerNumber = snapshot.size()/4;
+		int playerNumber = snapshot.size() / 4;
 		Long player = 0L;
 		int num = 0;
 		int turn = 0;
@@ -129,8 +129,9 @@ public class SnapExecutor {
 							moved.addAll(movedMeeples);
 						}
 					}
+				} else {
+					moved.add(new MovedMeeple());
 				}
-				else moved.add(new MovedMeeple());
 			}
 			turn++;
 		}
@@ -223,6 +224,28 @@ public class SnapExecutor {
 			gameDto.setRequiredAction("move");
 		}
 		return gameDto;
+	}
+
+	public Boolean areMovesIdentical(List<Boolean> moves, List<Meeple> meeples, int totalMoves) {
+		int position = -14;
+		int index = 0;
+		int repeated = 1;
+		for (Boolean b : moves) {
+			if (b && position != -14) {
+				if (position == meeples.get(index).getPosition()) {
+					repeated++;
+				}
+			}
+			if (b && position == -14) {
+				position = meeples.get(index).getPosition();
+			}
+			index++;
+		}
+		if (repeated == totalMoves) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }

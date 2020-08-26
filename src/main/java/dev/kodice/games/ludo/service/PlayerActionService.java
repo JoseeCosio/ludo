@@ -81,7 +81,15 @@ public class PlayerActionService {
 					}
 					return turn;
 				}
-				if (moves > 1) {// validate if all moves give same result
+				if (moves > 1) {
+					if(snapExecutor.areMovesIdentical(legalMoves, snapExecutor.getPlayerInTurn(snapshot).getMeeples(), moves)) {
+						turn.setMovedMeeples(snapExecutor.moveMeeple(snapshot, turnExecutor.getLegalMove(legalMoves), dice));
+						if (turn.getMovedMeeples().size() == 1
+								&& turn.getMovedMeeples().get(0).getLandingRelativePosition() != 57 && dice != 6) {
+							snapExecutor.passTurn(snapshot);
+						}
+						return turn;
+					}
 					gameService.setMove(id);
 					return turn;
 				}
