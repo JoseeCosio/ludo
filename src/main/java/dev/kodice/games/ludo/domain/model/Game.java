@@ -92,18 +92,17 @@ public class Game {
 		this.players.set(player - 1, p);
 	}
 
-	
-	/* 
-	 * Kicks any enemy quantity of meeples if not in protected cell
-	 * 
-	 * Needed to validate to protect meeples when grouped
-	 * 
-	 * */
 	public List<MovedMeeple> kickMeeples(int landing, int player) {
 		List<MovedMeeple> movedMeeples = new ArrayList<MovedMeeple>();
 		int kicked = 0;
 		int y1 = 0;
 		int y2 = 0;
+		int kickPower = 0;
+		for (Meeple m : this.getPlayers().get(player - 1).getMeeples()) {
+			if (m.getPosition() == landing) {
+				kickPower++;
+			}
+		}
 		for (Player p : this.getPlayers()) {
 			y1++;
 			if (y1 != player) {
@@ -112,7 +111,6 @@ public class Game {
 				y2 = 0;
 				for (Meeple m : p.getMeeples()) {
 					y2++;
-					;
 					if (m.getPosition() == landing) {
 						kicked++;
 						movedMeeple.setPlayerId((long) y1);
@@ -121,7 +119,7 @@ public class Game {
 						movedMeeple.setFinalPosition(0);
 					}
 				}
-				if (kicked == 1) {
+				if (kicked <= kickPower && kicked > 0) {
 					movedMeeples.add(movedMeeple);
 				}
 			}
