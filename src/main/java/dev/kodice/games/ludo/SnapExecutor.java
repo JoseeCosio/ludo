@@ -32,18 +32,20 @@ public class SnapExecutor {
 	public Player getPlayerInTurn(List<GameSnapshot> snapshot) {
 		Player player = new Player();
 		List<Meeple> meeples = new ArrayList<Meeple>();
-		for (GameSnapshot game : snapshot) {
-			if (game.isPTurn()) {
+		for (int i = 0; i < snapshot.size() / 4; i++) {
+			if (snapshot.get(0 + 4 * i).isPTurn()) {
 				if (!player.getTurn()) {
-					player.setId(game.getPId());
-					player.setKey(game.getPKey());
+					player.setId(snapshot.get(4 * i).getPId());
+					player.setKey(snapshot.get(4 * i).getPKey());
 					player.setTurn(true);
 				}
-				Meeple meeple = new Meeple();
-				meeple.setId(game.getMId());
-				meeple.setPosition(game.getMPos());
-				meeple.setRelativePosition(game.getMRel());
-				meeples.add(meeple);
+				for (int j = 0; j <= 3; j++) {
+					Meeple meeple = new Meeple();
+					meeple.setId(snapshot.get(4 * i + j).getMId());
+					meeple.setPosition(snapshot.get(4 * i + j).getMPos());
+					meeple.setRelativePosition(snapshot.get(4 * i + j).getMRel());
+					meeples.add(meeple);
+				}
 			}
 		}
 		player.setMeeples(meeples);
@@ -74,12 +76,13 @@ public class SnapExecutor {
 		return num;
 	}
 
-	public void passTurn(List<GameSnapshot> snapshotGame) {
+	public void passTurn(List<GameSnapshot> snapshot) {
+		int playerNumber = snapshot.size()/4;
 		Long player = 0L;
 		int num = 0;
 		int turn = 0;
 		List<Long> index = new ArrayList<Long>();
-		for (GameSnapshot g : snapshotGame) {
+		for (GameSnapshot g : snapshot) {
 			if (!g.getPId().equals(player)) {
 				if (g.isPTurn()) {
 					turn = num;
@@ -90,7 +93,7 @@ public class SnapExecutor {
 			}
 		}
 		playerRepository.removeTurn(index.get(turn));
-		playerRepository.setTurn(index.get((turn + 1) % 4));
+		playerRepository.setTurn(index.get((turn + 1) % playerNumber));
 	}
 
 	public List<MovedMeeple> moveMeeple(List<GameSnapshot> snapshot, int moving, int dice) {
@@ -115,20 +118,19 @@ public class SnapExecutor {
 						initial = 0;
 					}
 					MovedMeeple movedMeeple = new MovedMeeple(game.getPlayers().get(turn - 1).getId(), moving, initial,
-							m.getPosition(),landing.getRelativePosition());
+							m.getPosition(), landing.getRelativePosition());
 					moved.add(movedMeeple);
-				} else {
-					// validate wrong moving input
-				}
-				if (!turnExe.isCellProtected(landing.getPosition())) {
-					List<MovedMeeple> movedMeeples = game.kickMeeples(landing.getPosition(), turn);
-					for (MovedMeeple up : movedMeeples) {
-						gameService.updateMeeple(game.getMeeple(up.getPlayerId().intValue(), up.getMeeple()));
-					}
-					if (movedMeeples.size() > 0) {
-						moved.addAll(movedMeeples);
+					if (!turnExe.isCellProtected(landing.getPosition())) {
+						List<MovedMeeple> movedMeeples = game.kickMeeples(landing.getPosition(), turn);
+						for (MovedMeeple up : movedMeeples) {
+							gameService.updateMeeple(game.getMeeple(up.getPlayerId().intValue(), up.getMeeple()));
+						}
+						if (movedMeeples.size() > 0) {
+							moved.addAll(movedMeeples);
+						}
 					}
 				}
+				else moved.add(new MovedMeeple());
 			}
 			turn++;
 		}
