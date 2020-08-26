@@ -76,12 +76,13 @@ public class SnapExecutor {
 		return num;
 	}
 
-	public void passTurn(List<GameSnapshot> snapshotGame) {
+	public void passTurn(List<GameSnapshot> snapshot) {
+		int playerNumber = snapshot.size()/4;
 		Long player = 0L;
 		int num = 0;
 		int turn = 0;
 		List<Long> index = new ArrayList<Long>();
-		for (GameSnapshot g : snapshotGame) {
+		for (GameSnapshot g : snapshot) {
 			if (!g.getPId().equals(player)) {
 				if (g.isPTurn()) {
 					turn = num;
@@ -92,7 +93,7 @@ public class SnapExecutor {
 			}
 		}
 		playerRepository.removeTurn(index.get(turn));
-		playerRepository.setTurn(index.get((turn + 1) % 4));
+		playerRepository.setTurn(index.get((turn + 1) % playerNumber));
 	}
 
 	public List<MovedMeeple> moveMeeple(List<GameSnapshot> snapshot, int moving, int dice) {
