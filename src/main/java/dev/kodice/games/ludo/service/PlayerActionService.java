@@ -76,7 +76,7 @@ public class PlayerActionService {
 					turn.setMovedMeeples(
 							snapExecutor.moveMeeple(snapshot, turnExecutor.getLegalMove(legalMoves), dice));
 					if (turn.getMovedMeeples().size() == 1
-							&& turn.getMovedMeeples().get(0).getLandingRelativePosition() != 57) {
+							&& turn.getMovedMeeples().get(0).getLandingRelativePosition() != 57 && dice != 6) {
 						snapExecutor.passTurn(snapshot);
 					}
 					return turn;

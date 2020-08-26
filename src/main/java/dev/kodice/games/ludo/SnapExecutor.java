@@ -32,18 +32,20 @@ public class SnapExecutor {
 	public Player getPlayerInTurn(List<GameSnapshot> snapshot) {
 		Player player = new Player();
 		List<Meeple> meeples = new ArrayList<Meeple>();
-		for (GameSnapshot game : snapshot) {
-			if (game.isPTurn()) {
+		for (int i = 0 ; i<=snapshot.size()/4;i++) {
+			if (snapshot.get(0+4*i).isPTurn()) {
 				if (!player.getTurn()) {
-					player.setId(game.getPId());
-					player.setKey(game.getPKey());
+					player.setId(snapshot.get(0+4*i).getPId());
+					player.setKey(snapshot.get(0+4*i).getPKey());
 					player.setTurn(true);
 				}
+				for(int j=0;j<=3;j++) {
 				Meeple meeple = new Meeple();
-				meeple.setId(game.getMId());
-				meeple.setPosition(game.getMPos());
-				meeple.setRelativePosition(game.getMRel());
+				meeple.setId(snapshot.get(0+4*i+j).getMId());
+				meeple.setPosition(snapshot.get(0+4*i+j).getMPos());
+				meeple.setRelativePosition(snapshot.get(0+4*i+j).getMRel());
 				meeples.add(meeple);
+				}
 			}
 		}
 		player.setMeeples(meeples);
