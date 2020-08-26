@@ -109,13 +109,19 @@ public class PlayerActionService {
 						snapshot.get(0).getSRolled());
 				turn.setMovedMeeples(movedMeeples);
 				if (turn.getMovedMeeples().size() == 1 && snapshot.get(0).getSRolled() != 6
-						&& turn.getMovedMeeples().get(0).getLandingRelativePosition() != 57) {
+						&& turn.getMovedMeeples().get(0).getLandingRelativePosition() != 57
+						&& !turn.getMovedMeeples().get(0).getPlayerId().equals(0L)) {
 					snapExecutor.passTurn(snapshot);
 					passTurn++;
 				}
+				if(!turn.getMovedMeeples().get(0).getPlayerId().equals(0L)) {
 				gameService.setRoll(id);
 				turn.setPlayerInTurn((snapExecutor.getPlayerToRoll(snapshot) - 1 + passTurn) % 4 + 1);
 				return turn;
+				} else {
+					turn.setMessage("Not a valid move mate!");
+					return turn;
+				}
 			} else {
 				turn.setMessage("Waiting for a roll, not a move!");
 				return turn;
