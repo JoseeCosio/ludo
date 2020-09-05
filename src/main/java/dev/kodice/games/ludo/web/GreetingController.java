@@ -79,7 +79,7 @@ public class GreetingController {
 			}
 			return turn;
 		}
-		turn.setMessage("Syntaxis error, check greetings manual to KodiceLudo at dev.kodice/games/ludo.js");
+		turn.setMessage("Syntaxis error, check greetings manual to KodiceLudo at kodice.software/ludo-api");
 		return turn;
 	}
 

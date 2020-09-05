@@ -109,16 +109,13 @@ public class SnapExecutor {
 			if (p.getTurn()) {
 				Meeple m = game.getMeeple(turn, moving);
 				Landing landing = turnExe.getLandingCell(m, dice, turn);
+				int initial = m.getPosition();
 				if (turnExe.canMeepleMove(m, dice)) {
 					game.updateMeeple(turn, moving, landing);
 					Meeple m2save = game.getMeeple(turn, moving);
 					gameService.updateMeeple(m2save);
-					int initial = m.getPosition() - dice;
-					if (initial < 0) {
-						initial = 0;
-					}
-					MovedMeeple movedMeeple = new MovedMeeple(game.getPlayers().get(turn - 1).getId(), moving, initial,
-							m.getPosition(), landing.getRelativePosition());
+					MovedMeeple movedMeeple = new MovedMeeple(Long.valueOf(turn), moving, initial, m.getPosition(),
+							landing.getRelativePosition());
 					moved.add(movedMeeple);
 					if (!turnExe.isCellProtected(landing.getPosition())) {
 						List<MovedMeeple> movedMeeples = game.kickMeeples(landing.getPosition(), turn);
